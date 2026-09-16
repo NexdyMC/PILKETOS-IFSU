@@ -1,0 +1,20 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Route::get('/index', function () {
+//     return view('index');
+// })->name('index');
+
+
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+
+require __DIR__ . '/admin.php';
+require __DIR__ . '/siswa.php';
