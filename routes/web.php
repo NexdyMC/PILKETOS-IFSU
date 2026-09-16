@@ -7,11 +7,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Route::get('/index', function () {
-//     return view('index');
-// })->name('index');
-
-
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

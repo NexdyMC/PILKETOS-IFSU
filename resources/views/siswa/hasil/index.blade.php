@@ -22,7 +22,7 @@
 
         <!-- hero : icon -->
         <div class="flex justify-center">
-          <div class="flex items-center justify-center w-20 h-20 transition-all shadow-md bg-gradient-to-br from-amber-500 to-amber-300 rounded-xl">
+          <div class="flex items-center text-white justify-center w-20 h-20 transition-all shadow-md bg-gradient-to-br from-amber-500 to-amber-300 rounded-xl">
            	<i class="fa-solid text-[40px] fa-chart-line"></i>
           </div>
         </div>
@@ -116,8 +116,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
 
       {{-- dougnut chart --}}
+      {{-- <i class="fa-solid fa-chart-pie"></i> --}}
       <div class="bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-bold text-slate-800">Persentase Suara</h3>
+        <h3 class="text-2xl font-bold text-slate-800">Persentase Suara</h3>
         <p class="text-sm text-slate-400 mb-4">Diagram Donat / Doughnut Chart</p>
         
         <div class="relative w-full h-[350px]">
@@ -126,8 +127,9 @@
       </div>
 
       {{-- bar chart --}}
+      {{-- <i class="fa-solid fa-chart-simple"></i> --}}
       <div class="bg-white rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-bold text-slate-800">Perbandingan Perolehan Suara</h3>
+        <h3 class="text-2xl font-bold text-slate-800">Perbandingan Perolehan Suara</h3>
         <p class="text-sm text-slate-400 mb-4">Diagram Batang / Bar Chart</p>
         
         <div class="relative w-full h-[350px]">
@@ -137,7 +139,7 @@
     </div>
 
     <div class="mt-6">
-        <h2 class="text-lg font-bold text-slate-800 mb-4">Progress Perolehan Kandidat</h2>
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Progress Perolehan Kandidat</h2>
         <div id="progress-kandidat" class="space-y-4"></div>
     </div>
 
