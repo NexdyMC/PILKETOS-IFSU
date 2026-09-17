@@ -11,7 +11,11 @@ class LoginController extends Controller
 {
     public function index() 
     {
-        return view('admin.login');
+        if (session('admin_id')) {
+            return view('admin.dashboard');
+        } else {
+            return view('admin.login');
+        }
     }
 
 

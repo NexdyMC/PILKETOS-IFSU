@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login Token — E-Voting OSIS</title>
+    <title>Login Siswa — E-Voting OSIS</title>
     
     <!-- link : CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,8 +59,8 @@
 
                     <!-- Tombol Submit -->
                     <button type="submit" name="login"
-                    class="w-full py-3.5 px-4 bg-yellow-400 hover:bg-yellow-500 text-white font-display font-extrabold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group">
-                        <span>Masuk ke Bilik Suara</span>
+                    class="w-full py-3.5 px-4 bg-yellow-400 hover:bg-yellow-500 text-white font-display font-extrabold text-md rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group">
+                        Masuk ke Bilik Suara
                         <i class="text-[16px] transition-transform fa-solid fa-arrow-right group-hover:translate-x-1"></i>
                     </button>
                 </form>
@@ -73,7 +73,7 @@
                 </div>
             </div>
         </div>
-        <p class="pt-6 text-center text-slate-300">&copy; 2026 Febri Pratama — All Right Reserved.</p>
+        <p class="pt-6 text-center text-white/40">&copy; 2026 Febri Pratama — All Right Reserved.</p>
     </main>
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
