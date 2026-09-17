@@ -15,6 +15,6 @@ Route::get('/siswa/voting', [VotingController::class, 'index'])->name('siswa.vot
 
 Route::get('/siswa/hasil', [HasilController::class, 'index'])->name('siswa.hasil');
 
-Route::get('/siswa/hasil/statistik', [HasilController::class, 'statistik']);
+Route::get('/siswa/hasil/statistik', [HasilController::class, 'statistik'])->name('siswa.hasil.statis');
 
-Route::get('/siswa/hasil/suara-kandidat', [HasilController::class, 'suaraKandidat']);
+Route::get('/siswa/hasil/suara-kandidat', [HasilController::class, 'suaraKandidat'])->name('siswa.hasil.kandidat');

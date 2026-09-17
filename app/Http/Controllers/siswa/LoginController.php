@@ -9,7 +9,7 @@ use App\Models\Siswa;
 class loginController extends Controller
 {
 
-    public function showLogin() 
+    public function index() 
     {
         return view('login');
     }
