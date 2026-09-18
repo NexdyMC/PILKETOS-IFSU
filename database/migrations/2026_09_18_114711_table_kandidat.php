@@ -11,13 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Schema::create('tb_kandidat', function (Blueprint $table) {
+        //     $table->integer('id_kandidat')->primary()->autoIncrement();
+        //     $table->string('nama', 100);
+        //     $table->string('kelas', 20);
+        //     $table->text('visi');
+        //     $table->text('misi');
+        //     $table->string('image', 100)->nullable();
+        // });
         Schema::create('tb_kandidat', function (Blueprint $table) {
-            $table->integer('id_kandidat')->primary()->autoIncrement();
-            $table->string('nama', 100);
-            $table->string('kelas', 20);
+            $table->id();
+            $table->string('nama');
+            $table->string('kelas');
             $table->text('visi');
             $table->text('misi');
-            $table->string('image', 100)->nullable();
+            $table->string('image');
+            $table->timestamps();
         });
     }
 
@@ -26,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tb_kandidats');
+        Schema::dropIfExists('tb_kandidat');
     }
 };

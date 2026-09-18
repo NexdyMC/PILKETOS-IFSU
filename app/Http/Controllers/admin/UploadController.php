@@ -30,7 +30,7 @@ class UploadController extends Controller
             'kelas' => $request->kelas,
             'visi'  => $request->visi,
             'misi'  => $request->misi,
-            'image' => basename($path),
+            'image' => $path,
         ]);
 
         return redirect()->route('admin.upload')->with('success', 'Kandidat berhasil ditambahkan');

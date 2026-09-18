@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tb_siswa', function (Blueprint $table) {
-            $table->string('token', 10)->primary();
-            $table->string('nama', 100);
-            $table->string('kelas', 10);
-            $table->string('jurusan', 10);
-            $table->integer('status');
-            $table->integer('voted');
+        Schema::create('tb_admin', function (Blueprint $table) {
+            $table->id('id_admin');
+            $table->strint('nama', 50);
+            $table->strint('kelas', 10);
+            $table->strint('username', 50);
+            $table->strint('password', 50);
         });
     }
 

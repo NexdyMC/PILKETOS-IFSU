@@ -2,62 +2,34 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <title>{{ $title ?? 'Dashboard' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    {{-- Chart.js --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    {{-- AOS --}}
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-
-    {{-- SweetAlert2 --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- @vite('resources/css/app.css') --}}
+    @livewireStyles
 </head>
-<body class="text-gray-800 bg-gray-100">
+<body class="flex">
 
-    <div class="flex min-h-screen">
-        {{-- Sidebar --}}
-        <aside class="w-56 p-4 space-y-2 text-white bg-gray-900">
-            <h1 class="mb-6 text-lg font-bold">My Dashboard</h1>
-
-            <a href="/dashboard?tab=dashboard" class="block px-3 py-2 rounded tab-link hover:bg-gray-700" data-tab="dashboard">
-                dashboard
+    {{-- SIDEBAR --}}
+    <aside class="w-64 h-screen bg-gray-900 text-white p-4">
+        <h2 class="text-xl font-bold mb-6">Dashboard</h2>
+        <nav class="flex flex-col gap-2">
+            <a href="{{ route('dashboard.home') }}" wire:navigate class="hover:bg-gray-700 p-2 rounded">
+                🏠 Home
             </a>
-            <a href="/dashboard?tab=kandidat" class="block px-3 py-2 rounded tab-link hover:bg-gray-700" data-tab="kandidat">
-                kandidat
+            <a href="{{ route('dashboard.image') }}" wire:navigate class="hover:bg-gray-700 p-2 rounded">
+                🖼️ Image
             </a>
-            <a href="/dashboard?tab=settings" class="block px-3 py-2 rounded tab-link hover:bg-gray-700" data-tab="settings">
-                Settings
+            <a href="{{ route('dashboard.siswa') }}" wire:navigate class="hover:bg-gray-700 p-2 rounded">
+                🧑‍🎓 Siswa
             </a>
-        </aside>
+        </nav>
+    </aside>
 
-        {{-- Main area --}}
-        <div class="flex flex-col flex-1">
-            {{-- Navbar --}}
-            <nav class="flex items-center justify-between px-6 py-3 bg-white shadow">
-                <span id="page-title" class="font-semibold text-gray-700">Dashboard</span>
-                <span class="text-sm text-gray-400">Logged in as Admin</span>
-            </nav>
+    {{-- KONTEN --}}
+    <main class="flex-1 p-6">
+        {{ $slot }}
+    </main>
 
-            {{-- Loading bar tipis --}}
-            <div id="loading-bar" class="h-0.5 bg-blue-500 w-0 transition-all duration-300"></div>
-
-            {{-- Content --}}
-            <main id="tab-content" class="flex-1 p-6">
-                @yield('content')
-            </main>
-
-            {{-- Footer --}}
-            <footer class="py-4 text-xs text-center text-gray-400">
-                &copy; {{ date('Y') }} My App
-            </footer>
-        </div>
-    </div>
-
-    {{-- <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script> --}}
-    <script src="{{ asset('js/navigation.js') }}"></script>
+    @livewireScripts
 </body>
 </html>
