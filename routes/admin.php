@@ -5,7 +5,6 @@ use App\Http\Controllers\admin\LoginController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\UploadController;
 use App\Livewire\Dashboard\Home;
-use App\Livewire\Dashboard\Image;
 use App\Livewire\Dashboard\Siswa;
 
 Route::get('/admin', function () {
@@ -25,6 +24,14 @@ Route::post('/admin/upload', [UploadController::class, 'store'])->name('kandidat
 
 Route::get('/dashboard', Home::class)->name('dashboard.home');
 
-Route::get('/dashboard/image', Image::class)->name('dashboard.image');
-
 Route::get('/dashboard/siswa', Siswa::class)->name('dashboard.siswa');
+
+// Route::get('/dashboard', Home::class)->name('admin.dashboard.home');
+
+// Route::get('/dashboard/kandidat', Kandidat::class)->name('admin.dashboard.kandidat');
+
+// Route::get('/dashboard/siswa', Siswa::class)->name('admin.dashboard.siswa');
+
+// Route::get('/dashboard/settings', Settings::class)->name('admin.dashboard.settings');
+
+// Route::get('/dashboard/export', Export::class)->name('admin.dashboard.export');
