@@ -35,7 +35,7 @@ class LoginController extends Controller
             ], 404);
         }
 
-        if (!Hash::check($request->password, $admin->password)) {
+        if (!($request->password == $admin->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Password salah'
@@ -43,8 +43,9 @@ class LoginController extends Controller
         }
 
         session([
-            'admin_id' => $admin->id,
+            'id_admin' => $admin->id_admin,
             'username' => $admin->username,
+            'kelas' => $admin->kelas,
         ]);
 
         return response()->json([

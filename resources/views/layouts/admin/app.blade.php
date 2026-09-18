@@ -2,46 +2,62 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin - PILKETOS IFSU</title>
-
+    <title>Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <!-- AOS (opsional, kalau dipakai) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.css">
+    {{-- Chart.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {{-- AOS --}}
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-slate-100">
+<body class="text-gray-800 bg-gray-100">
 
-    <!-- LOADING BAR ala GitHub -->
-    <div id="loading-bar" class="fixed top-0 left-0 h-1 bg-blue-500 z-50 transition-all duration-300 ease-out" style="width: 0%;"></div>
+    <div class="flex min-h-screen">
+        {{-- Sidebar --}}
+        <aside class="w-56 p-4 space-y-2 text-white bg-gray-900">
+            <h1 class="mb-6 text-lg font-bold">My Dashboard</h1>
 
-    <div class="flex">
-        <!-- SIDEBAR -->
-        <div class="w-64 bg-slate-900 min-h-screen p-4">
-            <nav class="space-y-2">
-                <a href="/admin/dashboard?tab=home" data-tab="home" class="tab-link block px-4 py-2 rounded-lg text-white hover:bg-slate-700">
-                    <i class="fa-solid fa-gauge"></i> Dashboard
-                </a>
-                <a href="/admin/dashboard?tab=upload" data-tab="upload" class="tab-link block px-4 py-2 rounded-lg text-white hover:bg-slate-700">
-                    <i class="fa-solid fa-upload"></i> Upload Kandidat
-                </a>
-                <a href="/admin/dashboard?tab=kandidat" data-tab="kandidat" class="tab-link block px-4 py-2 rounded-lg text-white hover:bg-slate-700">
-                    <i class="fa-solid fa-list"></i> Data Kandidat
-                </a>
-                <a href="/admin/dashboard?tab=hasil" data-tab="hasil" class="tab-link block px-4 py-2 rounded-lg text-white hover:bg-slate-700">
-                    <i class="fa-solid fa-chart-line"></i> Hasil Voting
-                </a>
+            <a href="/dashboard?tab=dashboard" class="block px-3 py-2 rounded tab-link hover:bg-gray-700" data-tab="dashboard">
+                dashboard
+            </a>
+            <a href="/dashboard?tab=kandidat" class="block px-3 py-2 rounded tab-link hover:bg-gray-700" data-tab="kandidat">
+                kandidat
+            </a>
+            <a href="/dashboard?tab=settings" class="block px-3 py-2 rounded tab-link hover:bg-gray-700" data-tab="settings">
+                Settings
+            </a>
+        </aside>
+
+        {{-- Main area --}}
+        <div class="flex flex-col flex-1">
+            {{-- Navbar --}}
+            <nav class="flex items-center justify-between px-6 py-3 bg-white shadow">
+                <span id="page-title" class="font-semibold text-gray-700">Dashboard</span>
+                <span class="text-sm text-gray-400">Logged in as Admin</span>
             </nav>
-        </div>
 
-        <!-- KONTEN -->
-        <div class="flex-1 p-6">
-            <h1 id="page-title" class="text-2xl font-bold mb-4">Dashboard</h1>
-            <div id="tab-content">
+            {{-- Loading bar tipis --}}
+            <div id="loading-bar" class="h-0.5 bg-blue-500 w-0 transition-all duration-300"></div>
+
+            {{-- Content --}}
+            <main id="tab-content" class="flex-1 p-6">
                 @yield('content')
-            </div>
+            </main>
+
+            {{-- Footer --}}
+            <footer class="py-4 text-xs text-center text-gray-400">
+                &copy; {{ date('Y') }} My App
+            </footer>
         </div>
     </div>
 
-    <script
+    {{-- <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script> --}}
+    <script src="{{ asset('js/navigation.js') }}"></script>
+</body>
+</html>
