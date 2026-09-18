@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
-
+  @section('title', 'Voting - E-Vote OSIS')
 @endsection
 
 @section('content')
@@ -106,4 +106,146 @@
       @endforeach
     </div>
   </div>
+@endsection
+
+@section('script')
+<script>
+  $.ajaxSetup({
+    headers: {
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+  });
+
+  $(function () {
+    "use strict";
+
+    // ================== VOTING ==================
+    $('#scroll-container').on('click', '.btn-vote', function (e) {
+      e.stopPropagation(); // supaya klik tombol vote tidak ikut membuka popup
+      const idKandidat = $(this).data('id');
+      const name = $(this).data('name');
+      selectKandidat(idKandidat, name);
+    });
+
+    // ================== POPUP VISI & MISI ==================
+    const $popupModal   = $('#popupModal');
+    const $modalTitle   = $('#modalTitle');
+    const $modalImg     = $('#modalImg');
+    const $modalVisi    = $('#modalVisi');
+    const $modalMisi    = $('#modalMisi');
+    const $modalVoteBtn = $('#modalVoteBtn');
+
+    function openKandidatModal($card) {
+      const nama       = $card.data('nama');
+      const image      = $card.data('image');
+      const idKandidat = $card.data('id');
+
+      $modalTitle.text(nama);
+      $modalImg.attr('src', image).attr('alt', 'Kandidat ' + nama);
+      $modalVisi.html($card.find('.kandidat-visi').html() || '-');
+      $modalMisi.html($card.find('.kandidat-misi').html() || '-');
+      $modalVoteBtn.data('id', idKandidat).data('name', nama);
+
+      $popupModal.removeClass('hidden').addClass('flex');
+      $('body').addClass('overflow-hidden');
+    }
+
+    function closeKandidatModal() {
+      $popupModal.addClass('hidden').removeClass('flex');
+      $('body').removeClass('overflow-hidden');
+    }
+
+    // klik di kartu (bukan tombol vote) -> buka popup
+    $(document).on('click', '.kandidat-item', function (e) {
+      if ($(e.target).closest('.btn-vote').length) return;
+      openKandidatModal($(this));
+    });
+
+    // aksesibilitas: buka popup dengan Enter/Space saat kartu di-fokus (bukan tombol di dalamnya)
+    $(document).on('keydown', '.kandidat-item', function (e) {
+      if (e.target !== this) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openKandidatModal($(this));
+      }
+    });
+
+    $(document).on('click', '.btn-kandidat-item', function (e) {
+      if ($(e.target).closest('.btn-vote').length) return;
+      openKandidatModal($(this));
+    })
+
+    // tombol vote di dalam popup
+    $modalVoteBtn.on('click', function () {
+      const idKandidat = $(this).data('id');
+      const name = $(this).data('name');
+      closeKandidatModal();
+      selectKandidat(idKandidat, name);
+    });
+
+    $('#closeBtn, #closeModalAction').on('click', closeKandidatModal);
+
+    $popupModal.on('click', function (e) {
+      if ($(e.target).is('#popupModal')) closeKandidatModal();
+    });
+
+    $(document).on('keydown', function (e) {
+      if (e.key === 'Escape' && $popupModal.is(':visible')) closeKandidatModal();
+    });
+  });
+
+  function selectKandidat(idKandidat, name) {
+      Swal.fire({
+          title: `Pilih ${name}?`,
+          text: "Pilihan tidak dapat diubah setelah dikonfirmasi.",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonColor: "#2563eb",
+          cancelButtonColor: "#414141",
+          confirmButtonText: "Ya, Pilih!",
+          cancelButtonText: "Batal"
+      }).then(function (result) {
+          if (!result.isConfirmed) return;
+
+          $.ajax({
+              url: "/siswa/vote",
+              method: "POST",
+              data: {
+                  id_kandidat: idKandidat
+              },
+              dataType: "json"
+          })
+          .done(function (res) {
+              let timerInterval;
+              Swal.fire({
+                  title: "Berhasil!",
+                  html: `Vote untuk ${name} berhasil disimpan.<br><br>Halaman akan dialihkan dalam <b>5</b> detik.`,
+                  icon: "success",
+                  timer: 5000,
+                  timerProgressBar: true,
+                  showConfirmButton: false,
+                  didOpen: () => {
+                      const timerElement = Swal.getHtmlContainer().querySelector("b");
+                      timerInterval = setInterval(() => {
+                          timerElement.textContent = Math.ceil(Swal.getTimerLeft() / 1000);
+                      }, 100);
+                  },
+                  willClose: () => clearInterval(timerInterval)
+              }).then((result) => {
+                  if (result.dismiss === Swal.DismissReason.timer) {
+                      location.href = "/siswa/logout";
+                  }
+              });
+          })
+          .fail(function (jqXHR) {
+              let msg = jqXHR.responseJSON?.message || "Terjadi kesalahan saat memproses voting.";
+              Swal.fire({
+                  title: "Gagal!",
+                  text: msg,
+                  icon: "error"
+              });
+          });
+      });
+  }
+</script>
 @endsection
