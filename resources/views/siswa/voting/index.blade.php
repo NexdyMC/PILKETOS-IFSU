@@ -15,15 +15,15 @@
 @section('content')
   <div class="space-y-4 text-center">
     <div class="mx-auto space-y-3 text-center max-w-7xl">
-      <div class="py-6 space-y-4">
+      <div class="py-6 space-y-3 md:space-y-4 ">
 
         <div class="flex justify-center">
-          <div class="flex items-center justify-center w-20 h-20 text-white transition-all shadow-md bg-gradient-to-br from-amber-500 to-amber-300 rounded-xl">
-            <i class="text-[40px] fa-solid fa-users"></i>
+          <div class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 text-white transition-all shadow-md bg-gradient-to-br from-amber-500 to-amber-300 rounded-xl">
+            <i class="text-[32px] md:text-[40px] fa-solid fa-users"></i>
           </div>
         </div>
 
-        <h1 class="mb-4 text-5xl font-extrabold text-center text-slate-800">Voting <span class="text-[#FACC15]">OSIS</span></h1>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-center text-slate-800">Voting <span class="text-[#FACC15]">OSIS</span></h1>
         <p class="text-gray-600">Pilih calon ketua OSIS yang menurut Anda paling tepat</p>
 
         <div class="flex items-start gap-4 p-4 my-6 transition-all border-l-4 shadow-lg bg-amber-300/20 border-amber-300/80 border-l-amber-300 rounded-2xl sm:p-5 sm:items-center">	
@@ -62,11 +62,10 @@
           
           <!-- kandidat : image -->
           <div class="relative border-b-2 hover:border-blue-600 overflow-hidden bg-slate-800 aspect-[4/3] shrink-0">
-            <img src="{{ asset('/storage/kandidat/' . $row->image) }}" alt="Kandidat <?= htmlspecialchars($row['nama'], ENT_QUOTES, 'UTF-8'); ?>"
+            <img src="{{ asset('storage/kandidat/' . $row->image) }}" alt="{{ $row->nama }}"
               class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
           </div>
           <div class="grid gap-4 p-4">
-
             <!-- kandidat : nama siswa -->
             <h3 class="text-2xl font-bold text-center text-slate-800 shrink-0">
               {{ $row->nama }}

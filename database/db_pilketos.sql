@@ -164,11 +164,11 @@ INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, 
 
 CREATE TABLE `tb_admin` (
   `id_admin` int NOT NULL,
-  `admin` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `admin` varchar(50) CHARACTER SET utf8mb4 NOT NULL,
   `kelas` varchar(20) NOT NULL,
   `password` varchar(255) NOT NULL,
   `username` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `tb_admin`
@@ -186,11 +186,11 @@ INSERT INTO `tb_admin` (`id_admin`, `admin`, `kelas`, `password`, `username`) VA
 CREATE TABLE `tb_kandidat` (
   `id` int NOT NULL,
   `nama` varchar(100) NOT NULL,
-  `kelas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `kelas` varchar(10) CHARACTER SET utf8mb4 NOT NULL,
   `visi` text NOT NULL,
   `misi` text NOT NULL,
-  `image` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `image` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `tb_kandidat`
@@ -216,7 +216,7 @@ CREATE TABLE `tb_settings` (
   `waktu_mulai` datetime NOT NULL,
   `waktu_selesai` datetime NOT NULL,
   `logo_sekolah` varchar(40) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `tb_settings`
@@ -237,7 +237,7 @@ CREATE TABLE `tb_siswa` (
   `kelas` varchar(20) NOT NULL,
   `status` tinyint(1) NOT NULL DEFAULT '0',
   `voted` int NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `tb_siswa`
