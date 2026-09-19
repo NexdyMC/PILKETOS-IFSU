@@ -9,6 +9,6 @@ new class extends Component
 ?>
 
 <div>
-    <h1 class="text-2xl font-bold">Selamat Datang</h1>
-    <p>Ini halaman image</p>
+    <h1 class="text-2xl font-bold">Halaman Kandidat</h1>
+    <p>Ini halaman kandidat dashboard.</p>
 </div>

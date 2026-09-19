@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ $title ?? 'Dashboard' }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     {{-- @vite('resources/css/app.css') --}}
     @livewireStyles
 </head>
 <body class="flex">
 
-    {{-- SIDEBAR --}}
     <aside class="w-64 h-screen bg-gray-900 text-white p-4">
         <h2 class="text-xl font-bold mb-6">Dashboard</h2>
         <nav class="flex flex-col gap-2">
@@ -17,21 +15,20 @@
                 🏠 Home
             </a>
             <a href="{{ route('admin.dashboard.kandidat') }}" wire:navigate class="hover:bg-gray-700 p-2 rounded">
-                🖼️ Kandidat
+                🖼️ kandidat
             </a>
             <a href="{{ route('admin.dashboard.siswa') }}" wire:navigate class="hover:bg-gray-700 p-2 rounded">
                 🧑 Siswa
             </a>
             <a href="{{ route('admin.dashboard.settings') }}" wire:navigate class="hover:bg-gray-700 p-2 rounded">
-                🧑 Settings
+                🧑 settings
             </a>
             <a href="{{ route('admin.dashboard.export') }}" wire:navigate class="hover:bg-gray-700 p-2 rounded">
-                🧑 Export
+                🧑 export
             </a>
         </nav>
     </aside>
 
-    {{-- KONTEN --}}
     <main class="flex-1 p-6">
         {{ $slot }}
     </main>
