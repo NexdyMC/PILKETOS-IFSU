@@ -8,7 +8,18 @@ new class extends Component
 };
 ?>
 
-<div>
-    <h1 class="text-2xl font-bold">Halaman Beranda</h1>
-    <p>Ini halaman beranda dashboard.</p>
-</div>
+<main>
+    <header>
+    
+    </header>
+    <div>
+        <h1 class="text-2xl font-bold">Halaman Beranda</h1>
+        <p>Ini halaman beranda dashboard.</p>
+    </div>
+</main>
+
+@script
+<script>
+
+</script>
+@endscript

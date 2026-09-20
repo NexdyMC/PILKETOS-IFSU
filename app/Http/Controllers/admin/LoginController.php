@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
 
 class LoginController extends Controller
 {
@@ -68,5 +70,20 @@ class LoginController extends Controller
         ]);
 
         return response()->json(['success' => true, 'message' => 'Admin berhasil ditambahkan']);
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        // 1. Logout guard autentikasi
+        Auth::logout();
+
+        // 2. Hapus data session pengguna saat ini
+        $request->session()->invalidate();
+
+        // 3. Buat token CSRF baru untuk keamanan
+        $request->session()->regenerateToken();
+
+        // 4. Redirect ke halaman login atau beranda
+        return redirect('/admin/login')->with('success', 'Anda telah berhasil keluar.');
     }
 }
