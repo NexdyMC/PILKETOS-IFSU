@@ -19,7 +19,7 @@ class HasilController extends Controller
     {
         return response()->json(Siswa::static_hasil());
     }
-
+    
     public function suaraKandidat()
     {
         $kandidat = Kandidat::orderBy('id')->get(); // ganti dari nomor_urut ke id
