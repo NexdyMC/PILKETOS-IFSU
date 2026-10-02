@@ -15,11 +15,10 @@ class DashboardController extends Controller
 
         // kalau request AJAX (dari JS di atas), return partial saja
         if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
-            return view('admin.partials.' . $tab, $data);
+            return view('admin.dashboard.' . $tab, $data);
         }
-
-        // kalau akses langsung/refresh browser, return halaman penuh
-        return view('admin.index', array_merge($data, ['tab' => $tab]));
+        
+        return view('admin.dashboard.home', array_merge($data, ['tab' => $tab]));
     }
 
     private function getTabData($tab)

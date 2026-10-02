@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
 
 class LoginController extends Controller
 {
@@ -35,7 +37,7 @@ class LoginController extends Controller
             ], 404);
         }
 
-        if (!Hash::check($request->password, $admin->password)) {
+        if (!($request->password == $admin->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Password salah'
@@ -43,8 +45,9 @@ class LoginController extends Controller
         }
 
         session([
-            'admin_id' => $admin->id,
+            'id_admin' => $admin->id_admin,
             'username' => $admin->username,
+            'kelas' => $admin->kelas,
         ]);
 
         return response()->json([
@@ -67,5 +70,20 @@ class LoginController extends Controller
         ]);
 
         return response()->json(['success' => true, 'message' => 'Admin berhasil ditambahkan']);
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        // 1. Logout guard autentikasi
+        Auth::logout();
+
+        // 2. Hapus data session pengguna saat ini
+        $request->session()->invalidate();
+
+        // 3. Buat token CSRF baru untuk keamanan
+        $request->session()->regenerateToken();
+
+        // 4. Redirect ke halaman login atau beranda
+        return redirect('/admin/login')->with('success', 'Anda telah berhasil keluar.');
     }
 }

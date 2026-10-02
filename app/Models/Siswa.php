@@ -9,9 +9,9 @@ class Siswa extends Model
     protected $table = 'tb_siswa';
     protected $primaryKey = 'token';
     public $incrementing = false;
-    // protected $keyType = 'string';
-    // protected $fillable = ['id', 'token', 'nama', 'kelas', 'status', 'voted', 'last_active_at', 'is_logged_in'];
-
+    protected $keyType = 'string';
+    public $timestamps = false; // tambahkan ini — tabel tidak punya created_at/updated_at
+    protected $fillable = ['token', 'token', 'nama', 'kelas', 'status', 'voted'];
 
     public static function static_hasil()
     {
@@ -30,36 +30,4 @@ class Siswa extends Model
             'kandidat' => $totalKandidat,
         ];
     }
-
-    // // ⚠️ dummy data untuk testing, TIDAK connect ke database
-    // public static function dummyData()
-    // {
-    //     return [
-    //         'id' => 'S001',
-    //         'token' => 'NXYZ',
-    //         'nama' => 'Siswa Testing',
-    //         'kelas' => 'XII RPL 1',
-    //         'status' => 1,
-    //         'voted' => null,
-    //     ];
-    // }
-
-    // // override method cari token, pakai dummy bukan query DB
-    // public static function findByTokenDummy($token)
-    // {
-    //     $dummy = self::dummyData();
-
-    //     if ($token === $dummy['token']) {
-    //         $siswa = new self();
-    //         $siswa->id = $dummy['id'];
-    //         $siswa->token = $dummy['token'];
-    //         $siswa->nama = $dummy['nama'];
-    //         $siswa->kelas = $dummy['kelas'];
-    //         $siswa->status = $dummy['status'];
-    //         $siswa->voted = $dummy['voted'];
-    //         return $siswa;
-    //     }
-
-    //     return null;
-    // }
 }

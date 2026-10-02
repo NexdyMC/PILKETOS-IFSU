@@ -64,7 +64,7 @@
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-solid fa-key"></i>
                         </div>
-                        <input type="text" id="str-password" name="token" placeholder="Masukan Password" required autocomplete="off"
+                        <input type="password" id="str-password" name="token" placeholder="Masukan Password" required autocomplete="off"
                         class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono font-bold tracking-wider placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] focus:bg-white transition-all uppercase">
                     </div>
 

@@ -9,7 +9,7 @@ $(function () {
 
     $(window).on('popstate', function () {
         const params = new URLSearchParams(window.location.search);
-        const tab = params.get('tab') || 'home';
+        const tab = params.get('tab') || 'dashboard';
         loadTab(`/dashboard?tab=${tab}`, tab, false);
     });
 
