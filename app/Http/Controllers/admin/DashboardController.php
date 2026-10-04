@@ -3,6 +3,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kandidat;
+use App\Models\Siswa;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -31,5 +32,11 @@ class DashboardController extends Controller
             default:
                 return [];
         }
+    }
+
+    public function apiSiswa() 
+    {
+        $siswa = Siswa::all();
+        return response()->json($siswa);
     }
 }

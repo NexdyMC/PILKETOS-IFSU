@@ -35,4 +35,6 @@ Route::get('/admin/dashboard/settings', Settings::class)->name('admin.dashboard.
 Route::get('/admin/dashboard/export', Export::class)->name('admin.dashboard.export');
 
 Route::post('/siswa/import', [ExportExcelController::class, 'import'])->name('siswa.import');
-// Excel::import(new SiswaIm   port, $request->file('file'));   
+// Excel::import(new SiswaIm   port, $request->file('file'));  
+
+Route::get('/api/admin/siswa', [DashboardController::class, 'apiSiswa']);
