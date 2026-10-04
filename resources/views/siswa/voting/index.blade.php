@@ -55,14 +55,14 @@
       <div class="relative flex flex-col w-full h-full overflow-hidden transition-all duration-300 bg-white border-2 shadow-md cursor-pointer rounded-3xl hover:-translate-y-2 md:hover:-translate-y-4 hover:shadow-xl hover:border-blue-500 border-slate-300/80 group kandidat-item"
         data-id="{{ $row->id }}"
         data-nama="{{ $row->nama }}"
-        data-image="{{ asset('/storage/kandidat/' .  $row->image) }}"
+        data-image="{{ asset('/upload/photo/' .  $row->image) }}"
         tabindex="0" role="button"
         aria-haspopup="dialog"
         aria-label="Lihat visi dan misi {{ $row->nama }}">
           
           <!-- kandidat : image -->
           <div class="relative border-b-2 hover:border-blue-600 overflow-hidden bg-slate-800 aspect-[4/3] shrink-0">
-            <img src="{{ asset('storage/kandidat/' . $row->image) }}" alt="{{ $row->nama }}"
+            <img src="{{ asset('/upload/photo/' . $row->image) }}" alt="{{ $row->nama }}"
               class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
           </div>
           <div class="grid gap-4 p-4">

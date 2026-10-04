@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\admin\LoginController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\UploadController;
+use App\Http\Controllers\admin\KandidatController;
+use App\Http\Controllers\admin\SiswaController;
 use App\Http\Controllers\admin\ExportExcelController;
 use App\Livewire\Dashboard\Home;
 use App\Livewire\Dashboard\Siswa;
@@ -35,6 +37,16 @@ Route::get('/admin/dashboard/settings', Settings::class)->name('admin.dashboard.
 Route::get('/admin/dashboard/export', Export::class)->name('admin.dashboard.export');
 
 Route::post('/siswa/import', [ExportExcelController::class, 'import'])->name('siswa.import');
-// Excel::import(new SiswaIm   port, $request->file('file'));  
+
+Route::post('/admin/siswa', [SiswaController::class, 'store'])->name('admin.siswa.store');
+
+Route::post('/admin/siswa/reset', [SiswaController::class, 'reset'])->name('admin.siswa.reset');
+
+Route::prefix('admin/kandidat')->group(function () {
+    Route::get('data', [KandidatController::class, 'list'])->name('kandidat.api.list');
+    Route::post('/', [KandidatController::class, 'store'])->name('kandidat.api.store');
+    Route::put('{kandidat}', [KandidatController::class, 'update'])->name('kandidat.api.update');
+    Route::delete('{kandidat}', [KandidatController::class, 'destroy'])->name('kandidat.api.destroy');
+});
 
 Route::get('/api/admin/siswa', [DashboardController::class, 'apiSiswa']);
