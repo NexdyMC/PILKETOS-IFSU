@@ -337,22 +337,29 @@ new class extends Component
   $(document).on('submit' + NS, '#formKandidat', function (e) {
     e.preventDefault();
 
+    const $btn =$('#btnSimpanKandidat');
+    if ($btn.prop('disabled')) {
+        return false; 
+    }
+
     const id  = $('#inputKandidatId').val();
     const fd  = new FormData(this);
-    const $btn = $('#btnSimpanKandidat');
     fd.delete('id');
 
     let url = cfg.store;
     if (id) {
       url = `${cfg.base}/${encodeURIComponent(id)}`;
-      fd.append('_method', 'PUT'); // PHP tidak membaca multipart pada request PUT asli
+      fd.append('_method', 'PUT'); 
     }
 
-    $btn.prop('disabled', true);
+    const originalText = $btn.text();$btn.prop('disabled', true).text('Menyimpan...');
+
     request(url, 'POST', fd)
       .done((res) => { closeModal(); toast('success', res.message); loadKandidat(); })
       .fail(showError)
-      .always(() => $btn.prop('disabled', false));
+      .always(() => {
+          $btn.prop('disabled', false).text(originalText);
+      });
   });
 
   /* ---------- init ---------- */

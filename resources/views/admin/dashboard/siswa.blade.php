@@ -12,18 +12,15 @@ new class extends Component
      data-url-list="{{ url('/api/admin/siswa') }}"
      data-url-store="{{ route('admin.siswa.store') }}"
      data-url-reset="{{ route('admin.siswa.reset') }}"
+     data-url-kandidat="{{ route('kandidat.api.list') }}"
+     data-url-import="{{ route('admin.siswa.import') }}"
+     data-url-template="{{ route('admin.siswa.template') }}"
      data-csrf="{{ csrf_token() }}">
 
     <div class="mb-6">
         <h2 class="text-2xl font-semibold font-display text-navy-900">Statistik Voting</h2>
         <p class="mt-1 text-sm text-slate-500">Pantau perolehan suara sementara dan tingkat partisipasi pemilih secara real-time.</p>
     </div>
-
-    <form action="{{ route('siswa.import') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        <input type="file" name="file" required>
-        <button type="submit">Import</button>
-    </form>
 
     <div class="grid gap-8 lg:grid-cols-3">
 
@@ -32,6 +29,10 @@ new class extends Component
                 <h3 class="text-lg font-semibold font-display">Data Pemilih (Siswa)</h3>
 
                 <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" id="btnImportSiswa"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition bg-white border rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50">
+                        <i class="fa-solid fa-file-excel text-emerald-600"></i> Import Excel
+                    </button>
                     <button type="button" id="btnTambahSiswa"
                             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-xl bg-primary-700 hover:bg-primary-600">
                         <i class="fa-solid fa-user-plus"></i> Tambah Siswa
@@ -44,12 +45,21 @@ new class extends Component
             </div>
 
             <table class="w-full text-sm text-left">
-                <thead class="bg-slate-100 text-slate-600">
+                <thead wire:ignore class="bg-slate-100 text-slate-600">
                     <tr>
                         <th class="p-3 rounded-l-lg">Token</th>
-                        <th class="p-3">Nama</th>
-                        <th class="p-3">Kelas</th>
-                        <th class="p-3">Status</th>
+                        <th class="p-3" aria-sort="none">
+                            <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="nama">Nama <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
+                        </th>
+                        <th class="p-3" aria-sort="none">
+                            <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="kelas">Kelas <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
+                        </th>
+                        <th class="p-3" aria-sort="none">
+                            <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="status">Status <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
+                        </th>
+                        <th class="p-3 rounded-r-lg" aria-sort="none">
+                            <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="pilihan">Pilihan <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="tabel-siswa" wire:ignore class="divide-y divide-slate-100">
@@ -119,6 +129,9 @@ new class extends Component
         list:  $root.attr('data-url-list'),
         store: $root.attr('data-url-store'),
         reset: $root.attr('data-url-reset'),
+        kandidat: $root.attr('data-url-kandidat'),
+        import:   $root.attr('data-url-import'),
+        template: $root.attr('data-url-template'),
         csrf:  $root.attr('data-csrf'),
     };
     const TOKEN_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -128,6 +141,8 @@ new class extends Component
     if (window.__siswaTimer) clearInterval(window.__siswaTimer);
 
     let siswaList = [];
+    let kandidatPeta = null;                    // Map id kandidat -> nama (null jika gagal dimuat)
+    let urut = { kolom: null, arah: 'asc' };    // urutan tabel: nama | kelas | status | pilihan
 
     /* ---------- popup modern ---------- */
     const baseModal = {
@@ -181,10 +196,15 @@ new class extends Component
     // $.ajax dibungkus Promise: resolve(json) / reject(jqXHR)
     function request(url, method, data) {
         return new Promise((resolve, reject) => {
-            $.ajax({
+            const opts = {
                 url, method, data, dataType: 'json',
                 headers: { 'X-CSRF-TOKEN': cfg.csrf, 'X-Requested-With': 'XMLHttpRequest' }
-            }).done(resolve).fail(reject);
+            };
+            if (data instanceof FormData) { // upload file
+                opts.processData = false;
+                opts.contentType = false;
+            }
+            $.ajax(opts).done(resolve).fail(reject);
         });
     }
 
@@ -217,32 +237,118 @@ new class extends Component
     }
 
     /* ---------- tabel siswa ---------- */
+
+    // Kolom "Pilihan": cocokkan tb_siswa.voted dengan tb_kandidat.id lalu tampilkan nama kandidat
+    function pilihanBadge(s, peta) {
+        const id = s.voted == null ? '' : String(s.voted).trim();
+
+        if (id === '' || id === '0') {
+            return '<span class="text-slate-400">-</span>';
+        }
+        if (peta === null) { // daftar kandidat gagal dimuat: tampilkan ID mentah
+            return '<span class="px-2 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600">Kandidat #' + esc(id) + '</span>';
+        }
+        if (peta.has(id)) {
+            return '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-primary-50 text-primary-700">'
+                 + '<i class="fa-solid fa-check-to-slot"></i>' + esc(peta.get(id)) + '</span>';
+        }
+        // voted terisi tapi id tidak ada di tb_kandidat (mis. kandidat sudah dihapus)
+        return '<span class="px-2 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700">Kandidat tidak ditemukan</span>';
+    }
+
+    // Nama kandidat pilihan siswa (null = belum memilih); dipakai untuk pengurutan
+    function namaPilihan(s) {
+        const id = s.voted == null ? '' : String(s.voted).trim();
+        if (id === '' || id === '0') return null;
+        if (kandidatPeta === null) return 'Kandidat #' + id;
+        return kandidatPeta.has(id) ? kandidatPeta.get(id) : 'Kandidat tidak ditemukan';
+    }
+
+    // urut alami (angka dihitung sebagai angka) dan tidak membedakan huruf besar/kecil
+    const bandingTeks = (a, b) => String(a).localeCompare(String(b), 'id', { numeric: true, sensitivity: 'base' });
+
+    function urutkan(data) {
+        if (!urut.kolom) return data;
+
+        const arah  = urut.arah === 'asc' ? 1 : -1;
+        const kunci = {
+            nama:    (s) => s.nama,
+            kelas:   (s) => s.kelas,
+            status:  (s) => (s.status == 1 ? 1 : 0),   // asc: Belum -> Sudah
+            pilihan: namaPilihan
+        }[urut.kolom];
+
+        return data.slice().sort(function (a, b) {
+            const ka = kunci(a);
+            const kb = kunci(b);
+
+            // siswa yang belum memilih selalu di paling bawah, apa pun arahnya
+            if (urut.kolom === 'pilihan') {
+                if (ka === null && kb === null) return bandingTeks(a.nama, b.nama);
+                if (ka === null) return 1;
+                if (kb === null) return -1;
+            }
+
+            const hasil = typeof ka === 'number' ? ka - kb : bandingTeks(ka, kb);
+            if (hasil !== 0) return hasil * arah;
+            return bandingTeks(a.nama, b.nama);       // nilai sama: urut nama
+        });
+    }
+
+    function perbaruiIkonUrut() {
+        $('.btn-sort').each(function () {
+            const kol   = $(this).attr('data-sort');
+            const aktifKol = urut.kolom === kol;
+            const ikon  = aktifKol ? (urut.arah === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort';
+
+            $(this).find('i').attr('class', 'text-xs fa-solid ' + ikon + ' ' + (aktifKol ? 'text-primary-700' : 'text-slate-400'));
+            $(this).toggleClass('text-primary-700', aktifKol);
+            $(this).closest('th').attr('aria-sort', aktifKol ? (urut.arah === 'asc' ? 'ascending' : 'descending') : 'none');
+        });
+    }
+
+    function renderTabel() {
+        if (!aktif()) return;
+
+        let rows = '';
+        $.each(urutkan(siswaList), function (i, s) {
+            const status = s.status == 1
+                ? '<span class="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded">Sudah</span>'
+                : '<span class="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded">Belum</span>';
+            rows += `<tr class="hover:bg-slate-50">
+                <td class="p-3">
+                    <button type="button" class="inline-flex items-center gap-2 font-mono font-medium text-blue-600 transition-colors btn-copy-token hover:text-blue-800" data-token="${esc(s.token)}"> ${esc(s.token)}<i class="text-xs fa-regular fa-copy text-slate-400"></i></button>
+                </td>
+                <td class="p-3 font-medium text-navy-900">${esc(s.nama)}</td>
+                <td class="p-3 font-medium text-navy-900">${esc(s.kelas)}</td>
+                <td class="p-3">${status}</td>
+                <td class="p-3">${pilihanBadge(s, kandidatPeta)}</td>
+            </tr>`;
+        });
+        $('#tabel-siswa').html(rows);
+        perbaruiIkonUrut();
+    }
+
     function loadSiswa() {
         if (!aktif()) return;
-        $.ajax({
-            url: cfg.list,
-            method: 'GET',
-            success: function (data) {
-                siswaList = data;
-                let rows = '';
-                $.each(data, function (i, s) {
-                    const status = s.status == 1
-                        ? '<span class="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded">Sudah</span>'
-                        : '<span class="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded">Belum</span>';
-                    rows += `<tr class="hover:bg-slate-50">
-                        <td class="p-3">
-                            <button type="button" class="inline-flex items-center gap-2 font-mono font-medium text-blue-600 transition-colors btn-copy-token hover:text-blue-800" data-token="${esc(s.token)}"> ${esc(s.token)}<i class="text-xs fa-regular fa-copy text-slate-400"></i></button>
-                        </td>
-                        <td class="p-3 font-medium text-navy-900">${esc(s.nama)}</td>
-                        <td class="p-3 font-medium text-navy-900">${esc(s.kelas)}</td>
-                        <td class="p-3">${status}</td>
-                    </tr>`;
-                });
-                $('#tabel-siswa').html(rows);
-            },
-            error: function (xhr) {
-                console.error('Gagal ambil data siswa:', xhr);
-            }
+
+        Promise.all([
+            request(cfg.list, 'GET'),
+            request(cfg.kandidat, 'GET').catch(function (xhr) {
+                console.error('Gagal ambil data kandidat:', xhr);
+                return null;
+            })
+        ]).then(function (hasil) {
+            if (!aktif()) return;
+
+            siswaList = hasil[0];
+            kandidatPeta = hasil[1]
+                ? new Map(hasil[1].data.map(function (k) { return [String(k.id), k.nama]; }))
+                : null;
+
+            renderTabel();   // urutan pilihan pengguna tetap dipakai saat auto-refresh
+        }).catch(function (xhr) {
+            console.error('Gagal ambil data siswa:', xhr);
         });
     }
 
@@ -318,6 +424,93 @@ new class extends Component
         });
     }
 
+    /* ---------- import excel ---------- */
+    function importExcel() {
+        Modal.fire({
+            html: header('fa-solid fa-file-excel', 'bg-emerald-50 text-emerald-600', 'Import Siswa dari Excel',
+                         'Hanya kolom <b>nama</b> dan <b>kelas</b> yang dibaca. Token dibuat otomatis.') + `
+                <div class="px-6 pb-1 space-y-4">
+                    <label id="swDrop" for="swFile"
+                           class="flex flex-col items-center justify-center gap-1 p-6 text-center transition border-2 border-dashed cursor-pointer rounded-2xl border-slate-300 bg-slate-50 hover:border-primary-400 hover:bg-primary-50/50">
+                        <i class="mb-1 text-2xl fa-solid fa-cloud-arrow-up text-slate-400"></i>
+                        <span id="swFileNama" class="text-sm font-semibold break-all text-slate-800">Klik atau tarik file ke sini</span>
+                        <span class="text-xs text-slate-500">.xlsx, .xls, atau .csv (maks 2MB)</span>
+                        <input id="swFile" type="file" accept=".xlsx,.xls,.csv" class="hidden">
+                    </label>
+                    <div class="p-3 text-xs leading-relaxed border rounded-xl border-slate-200 bg-slate-50 text-slate-600">
+                        Baris pertama harus berisi judul kolom <b>nama</b> dan <b>kelas</b>. Siswa dengan nama dan kelas yang sama
+                        dengan data yang sudah ada akan dilewati.
+                        <a href="${esc(cfg.template)}" class="font-semibold text-primary-700 hover:underline">Unduh template</a>
+                    </div>
+                </div>`,
+            showCancelButton: true,
+            confirmButtonText: 'Import',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            preConfirm: () => {
+                const input = document.getElementById('swFile');
+                const file  = input && input.files ? input.files[0] : null;
+
+                if (!file) {
+                    Swal.showValidationMessage('Pilih file Excel terlebih dahulu.');
+                    return false;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    Swal.showValidationMessage('Ukuran file maksimal 2MB.');
+                    return false;
+                }
+
+                const fd = new FormData();
+                fd.append('file', file);
+                return request(cfg.import, 'POST', fd)
+                    .catch((xhr) => { Swal.showValidationMessage(pesanError(xhr)); return false; });
+            }
+        }).then((result) => {
+            if (!result.isConfirmed || !result.value) return;
+            loadSiswa();
+            hasilImport(result.value);
+        });
+    }
+
+    function hasilImport(res) {
+        const sukses = res.berhasil > 0;
+        const stat = (angka, label, cls) =>
+            `<div class="p-3 text-center rounded-xl ${cls}"><p class="text-2xl font-bold">${angka}</p><p class="text-xs font-medium">${label}</p></div>`;
+        const daftar = (judul, total, items, fmt) => {
+            if (!items.length) return '';
+            const sisa = total - items.length;
+            return `<div>
+                <p class="mb-1.5 text-xs font-semibold tracking-wide uppercase text-slate-500">${judul}</p>
+                <ul class="p-3 space-y-1 overflow-y-auto text-xs border max-h-36 rounded-xl border-slate-200 text-slate-600">
+                    ${items.map(fmt).join('')}
+                    ${sisa > 0 ? '<li class="text-slate-400">... dan ' + sisa + ' lainnya</li>' : ''}
+                </ul></div>`;
+        };
+
+        const gagalHtml = daftar('Baris gagal', res.gagal_total, res.gagal, (g) =>
+            '<li><b>Baris ' + esc(g.baris) + '</b>: ' + esc(g.alasan) + (g.nama ? ' (' + esc(g.nama) + ')' : '') + '</li>');
+        const dupHtml = daftar('Baris dilewati (sudah ada)', res.duplikat_total, res.duplikat, (d) =>
+            '<li><b>Baris ' + esc(d.baris) + '</b>: ' + esc(d.nama) + ' - ' + esc(d.kelas) + '</li>');
+
+        Modal.fire({
+            html: header(
+                    sukses ? 'fa-solid fa-check' : 'fa-solid fa-triangle-exclamation',
+                    sukses ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600',
+                    sukses ? 'Import selesai' : 'Tidak ada data yang diimpor',
+                    sukses ? 'Token siswa baru dibuat otomatis dan bisa dilihat di tabel.' : 'Periksa isi file lalu coba lagi.') + `
+                <div class="px-6 pb-1 space-y-4">
+                    <div class="grid grid-cols-3 gap-3">
+                        ${stat(res.berhasil, 'Berhasil', 'bg-emerald-50 text-emerald-700')}
+                        ${stat(res.duplikat_total, 'Dilewati', 'bg-amber-50 text-amber-700')}
+                        ${stat(res.gagal_total, 'Gagal', 'bg-red-50 text-red-700')}
+                    </div>
+                    ${gagalHtml}${dupHtml}
+                </div>`,
+            confirmButtonText: 'Selesai',
+        });
+    }
+
     /* ---------- reset voting ---------- */
     function resetVoting() {
         const total = siswaList.length;
@@ -355,6 +548,42 @@ new class extends Component
     }
 
     /* ---------- events (delegasi, namespace .siswa) ---------- */
+    // klik judul kolom: naik -> turun -> kembali ke urutan awal
+    $(document).on('click' + NS, '.btn-sort', function () {
+        const kol = $(this).attr('data-sort');
+
+        if (urut.kolom !== kol)        urut = { kolom: kol, arah: 'asc' };
+        else if (urut.arah === 'asc')  urut = { kolom: kol, arah: 'desc' };
+        else                           urut = { kolom: null, arah: 'asc' };
+
+        renderTabel();
+    });
+
+    $(document).on('click' + NS, '#btnImportSiswa', importExcel);
+
+    // tampilkan nama file yang dipilih / di-drop pada popup import
+    $(document).on('change' + NS, '#swFile', function () {
+        const f = this.files && this.files[0];
+        $('#swFileNama').text(f ? f.name : 'Klik atau tarik file ke sini');
+    });
+    $(document).on('dragover' + NS, '#swDrop', function (e) {
+        e.preventDefault();
+        $(this).addClass('border-primary-400 bg-primary-50/50');
+    });
+    $(document).on('dragleave' + NS, '#swDrop', function (e) {
+        e.preventDefault();
+        $(this).removeClass('border-primary-400 bg-primary-50/50');
+    });
+    $(document).on('drop' + NS, '#swDrop', function (e) {
+        e.preventDefault();
+        $(this).removeClass('border-primary-400 bg-primary-50/50');
+        const files = e.originalEvent.dataTransfer.files;
+        if (files && files.length > 0) {
+            $('#swFile')[0].files = files;
+            $('#swFileNama').text(files[0].name);
+        }
+    });
+
     $(document).on('click' + NS, '#btnTambahSiswa', tambahSiswa);
     $(document).on('click' + NS, '#btnResetVoting', resetVoting);
 
