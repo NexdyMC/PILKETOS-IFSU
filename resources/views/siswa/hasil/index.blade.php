@@ -10,8 +10,6 @@
 
   <!-- CDN : Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
   @section('title', 'Hasil - E-Vote OSIS')
 @endsection
 
@@ -174,53 +172,138 @@
 
     let chartPersentase, chartPerbandingan;
 
-    function initCharts() {
-        let ctxDonut = document.getElementById('chartPersentase').getContext('2d');
-        chartPersentase = new Chart(ctxDonut, {
-          type: 'doughnut',
-          data: {
-            labels: [],
-            datasets: [{
-              data: [],
-              backgroundColor: colors,
-              borderWidth: 4,
-              hoverOffset: 12,
-              borderRadius: 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '60%',
-            plugins: {
-              legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, color: '#475569', font: { family: "'Inter', sans-serif", size: 13, weight: 'bold' } } }
-            }
-          }
-        });
+// helper: hex -> rgba (colors harus format hex, mis. '#2563eb')
+const withAlpha = (hex, alpha) => {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+};
 
-        let ctxBar = document.getElementById('chartPerbandingan').getContext('2d');
-        chartPerbandingan = new Chart(ctxBar, {
-          type: 'bar',
-          data: {
-            labels: [],
-            datasets: [{
-              data: [],
-              backgroundColor: colors,
-              borderRadius: 6,
-              maxBarThickness: 60,
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false, // sama, wajib
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-          }
+// plugin: ring abu-abu + teks saat belum ada suara, total suara di tengah donut
+const centerTextPlugin = {
+  id: 'centerText',
+  beforeDraw(chart) {
+    const { ctx, chartArea: { left, right, top, bottom } } = chart;
+    const values = chart.data.datasets[0].data;
+    const total = values.reduce((a, b) => a + b, 0);
+    const cx = (left + right) / 2, cy = (top + bottom) / 2;
 
-        });
+    ctx.save();
+    if (total === 0) {
+      // ring kosong supaya donut tidak "hilang"
+      const outer = Math.min(right - left, bottom - top) / 2;
+      const inner = outer * 0.6;
+      ctx.beginPath();
+      ctx.arc(cx, cy, (outer + inner) / 2, 0, Math.PI * 2);
+      ctx.lineWidth = outer - inner;
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.stroke();
     }
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#1e293b';
+    ctx.font = "800 32px 'Poppins', sans-serif";
+    ctx.fillText(total, cx, cy - 8);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = "500 12px 'Inter', sans-serif";
+    ctx.fillText('TOTAL SUARA', cx, cy + 18);
+    ctx.restore();
+  }
+};
+
+function initCharts() {
+  const tooltipStyle = {
+    padding: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.92)',
+    titleFont: { family: "'Poppins', sans-serif", weight: '600' },
+    bodyFont: { family: "'Inter', sans-serif" },
+    cornerRadius: 10,
+    displayColors: true,
+    boxPadding: 4
+  };
+
+  // ================= DONUT =================
+  let ctxDonut = document.getElementById('chartPersentase').getContext('2d');
+  chartPersentase = new Chart(ctxDonut, {
+    type: 'doughnut',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: colors.map(c => withAlpha(c, 0.9)),
+        borderColor: '#ffffff',
+        borderWidth: 4,
+        hoverOffset: 12,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      layout: { padding: 20 },
+      animation: { animateRotate: true, animateScale: true, duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { usePointStyle: true, padding: 20, color: '#475569', font: { family: "'Inter', sans-serif", size: 13, weight: 'bold' } }
+        },
+        tooltip: {
+          ...tooltipStyle,
+          callbacks: {
+            label(ctx) {
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = total ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+              return ` ${ctx.parsed} suara (${pct}%)`;
+            }
+          }
+        }
+      }
+    },
+    plugins: [centerTextPlugin]
+  });
+
+  // ================= BAR =================
+  let ctxBar = document.getElementById('chartPerbandingan').getContext('2d');
+  chartPerbandingan = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: colors.map(c => withAlpha(c, 0.25)), // isi: transparan
+        borderColor: colors.map(c => withAlpha(c, 1)),        // border: warna sama, pekat
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,   // border melingkar penuh, termasuk sisi bawah
+        minBarLength: 8,        // batang tetap terlihat walau 0 suara
+        maxBarThickness: 60,
+        hoverBackgroundColor: colors.map(c => withAlpha(c, 0.45))
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: 20 },
+      animation: { duration: 800, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipStyle,
+          callbacks: { label: ctx => ` ${ctx.parsed.y} suara` }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#475569', font: { family: "'Inter', sans-serif", weight: '600' } } },
+        y: {
+          beginAtZero: true,
+          suggestedMax: 5,   // sumbu tidak mentok di 0-1 saat data kosong
+          grid: { color: 'rgba(148, 163, 184, 0.2)', drawBorder: false },
+          ticks: { stepSize: 1, precision: 0, color: '#94a3b8' }
+        }
+      }
+    }
+  });
+}
 
     function persentase(labels, data) {
         chartPersentase.data.labels = labels;
@@ -290,46 +373,66 @@
     }
 
     function progressKandidat(kandidatList) {
-        let container = $('#progress-kandidat');
-        let existingCards = container.children().length;
+        const $container = $('#progress-kandidat');
 
-        kandidatList.forEach(function(k, i) {
-            let warna = colors[i % colors.length];
-            let cardId = 'kandidat-card-' + k.nomor_urut;
+        // id card yang masih valid menurut data terbaru dari server
+        const activeIds = kandidatList.map(k => 'kandidat-card-' + k.nomor_urut);
 
-            // kalau card belum ada, buat baru
-            if ($('#' + cardId).length === 0) {
-                let html = `
-                    <div id="${cardId}" class="bg-white rounded-xl shadow-sm p-5">
+        // 1. HAPUS card kandidat yang sudah tidak ada di server
+        $container.children('.kandidat-card').each(function () {
+            if (!activeIds.includes(this.id)) {
+                $(this).fadeOut(300, function () { $(this).remove(); });
+            }
+        });
+
+        // 2. Tampilan kosong kalau tidak ada kandidat sama sekali
+        $('#progress-empty').remove();
+        if (kandidatList.length === 0) {
+            $container.append(
+                '<div id="progress-empty" class="p-6 text-center bg-white shadow-sm rounded-xl text-slate-400">Belum ada kandidat.</div>'
+            );
+            return;
+        }
+
+        // 3. BUAT / UPDATE card, lalu urutkan sesuai data server
+        kandidatList.forEach(function (k, i) {
+            const warna  = colors[i % colors.length];
+            const cardId = 'kandidat-card-' + k.nomor_urut;
+            const urut   = String(k.nomor_urut).padStart(2, '0');
+            let $card    = $('#' + cardId);
+
+            if ($card.length === 0) {
+                $card = $(`
+                    <div id="${cardId}" class="p-5 bg-white shadow-sm kandidat-card rounded-xl">
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: ${warna}">
-                                    ${String(k.nomor_urut).padStart(2, '0')}
-                                </div>
+                                <div class="flex items-center justify-center text-sm font-bold text-white rounded-full k-badge w-9 h-9"></div>
                                 <div>
-                                    <h4 class="font-bold text-slate-800">${k.nama}</h4>
-                                    <p class="text-xs text-slate-400">Paslon Nomor Urut ${String(k.nomor_urut).padStart(2, '0')}</p>
+                                    <h4 class="font-bold k-nama text-slate-800"></h4>
+                                    <p class="text-xs k-urut text-slate-400"></p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <h4 class="text-xl font-bold text-slate-800" id="${cardId}-suara">${k.suara}</h4>
+                                <h4 class="text-xl font-bold k-suara text-slate-800"></h4>
                                 <p class="text-xs text-slate-400">Suara</p>
                             </div>
                         </div>
-                        <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
-                            <div id="${cardId}-bar" class="h-4 rounded-full flex items-center justify-center text-xs font-bold text-white transition-all duration-700 ease-out"
-                                style="width: 0%; background-color: ${warna}">
-                                0%
-                            </div>
+                        <div class="w-full h-4 overflow-hidden rounded-full bg-slate-200">
+                            <div class="flex items-center justify-center h-4 text-xs font-bold text-white transition-all duration-700 ease-out rounded-full k-bar" style="width:0%"></div>
                         </div>
                     </div>
-                `;
-                container.append(html);
+                `);
             }
 
-            // update angka & lebar bar (baik card baru maupun yang sudah ada)
-            $('#' + cardId + '-suara').text(k.suara);
-            $('#' + cardId + '-bar').css('width', k.persen + '%').text(k.persen + '%');
+            // isi/refresh semua data (.text() = aman dari XSS untuk nama kandidat)
+            $card.find('.k-badge').text(urut).css('background-color', warna);
+            $card.find('.k-nama').text(k.nama);
+            $card.find('.k-urut').text('Paslon Nomor Urut ' + urut);
+            $card.find('.k-suara').text(k.suara);
+            $card.find('.k-bar').css({ width: k.persen + '%', 'background-color': warna }).text(k.persen + '%');
+
+            // append pada elemen yang sudah ada = memindahkannya, jadi urutan selalu ikut server
+            $container.append($card);
         });
     }
     
