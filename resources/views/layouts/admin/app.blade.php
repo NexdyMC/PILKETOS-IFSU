@@ -13,7 +13,6 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" data-navigate-once></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" data-navigate-once></script>
-    {{-- font awesome --}}
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     @livewireStyles
@@ -100,7 +99,7 @@
                 </div>
             </header>
             
-            <main id="main-content" class="w-full overflow-hidden max-h-screen overflow-y-auto">
+            <main id="main-content" class="w-full overflow-hidden">
                 {{ $slot }}
             </main>
         </div>

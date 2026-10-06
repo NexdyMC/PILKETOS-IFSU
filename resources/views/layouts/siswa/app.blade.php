@@ -7,7 +7,8 @@
   {{-- WAJIB: dibaca oleh $.ajaxSetup untuk header X-CSRF-TOKEN --}}
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'E-Vote OSIS')</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
   @yield('cdn')
 </head>
 <body class="bg-slate-100">
