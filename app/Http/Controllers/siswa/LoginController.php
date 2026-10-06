@@ -8,7 +8,7 @@ use App\Models\Siswa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
-class loginController extends Controller
+class LoginController extends Controller
 {
 
     public function index() 

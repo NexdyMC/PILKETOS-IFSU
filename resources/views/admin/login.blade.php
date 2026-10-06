@@ -25,15 +25,15 @@
                 
                     <!-- 1. Logo SMK (Kiri - Ukuran Sedang) -->
                     <img src="../assets/images/logo-osis.png" alt="Logo SMK"
-                        class="object-contain w-auto h-20 p-2 duration-300 bg-gray-100 rounded-full drop-shadow-md hover:scale-110">
+                        class="object-contain w-auto h-20 p-2 duration-300 bg-gray-100 rounded-full drop-shadow-md hover:scale-110" width="80" height="80">
 
                     <!-- 2. Logo IFSU (Tengah - Ukuran Lebih Besar) -->
                     <img src="../assets/images/logo-smk.png" alt="Logo IFSU"
-                        class="object-contain w-auto h-24 p-2 duration-300 scale-105 bg-gray-100 rounded-full drop-shadow-md hover:scale-110">
+                        class="object-contain w-auto h-24 p-2 duration-300 scale-105 bg-gray-100 rounded-full drop-shadow-md hover:scale-110" width="100" height="100">
 
                     <!-- 3. Logo OSIS (Kanan - Ukuran Sedang) -->
                     <img src="../assets/images/logo-mpk.png" alt="Logo OSIS"
-                        class="object-contain w-auto h-20 p-2 duration-300 bg-gray-100 rounded-full drop-shadow-md hover:scale-110">
+                        class="object-contain w-auto h-20 p-2 duration-300 bg-gray-100 rounded-full drop-shadow-md hover:scale-110" width="80" height="80">
                 </div>
                 
 

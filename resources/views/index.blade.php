@@ -26,7 +26,7 @@
 
       <!-- navbar : title -->
       <div class="flex items-center gap-2">
-        <img src="{{ asset('assets/images/logo-smk.png') }}" alt="Logo IFSU" class="w-12 h-12">
+        <img src="{{ asset('assets/images/logo-smk.png') }}" alt="Logo IFSU" class="w-12 h-12" width="32" height="32">
         <p class="text-xl font-semibold font-display text-navy-900">E-Vote<span class="text-primary-600"> OSIS</span>
         </p>
       </div>
@@ -59,11 +59,11 @@
   </header>
 
   <!-- section : hero -->
-  <section id="beranda" class="relative overflow-hidden bg-[#F8FAFC] pt-44 pb-32">
+  <section id="beranda" class="relative overflow-hidden bg-[#F8FAFC] pt-44 pb-32 h-[calc(100vh-64px)]">
     <div class="absolute rounded-full pointer-events-none blur-3xl opacity-35 w-72 h-72 bg-primary-500 -top-10 -left-10"></div>
     <div class="absolute right-0 rounded-full pointer-events-none blur-3xl opacity-35 w-80 h-80 bg-accent-400 top-24"></div>
 
-    <div class="relative max-w-6xl px-6 mx-auto text-center">
+    <div class="relative max-w-6xl px-6 lg:pt-16 mx-auto text-center">
       <h1 class="mt-6 text-4xl font-extrabold leading-tight font-display sm:text-5xl lg:text-6xl text-navy-900">
         Satu Suara <span class="text-primary-700">Satu Arah</span> 
         <br>untuk
@@ -72,7 +72,7 @@
         </span> yang Lebih Baik.
       </h1>
 
-      <p class="max-w-2xl mx-auto mt-6 text-base sm:text-lg text-navy-700">
+      <p class="max-w-2xl mx-auto mt-6 font-semibold sm:text-lg text-navy-700">
         Gunakan hak pilihmu secara digital, aman, dan transparan. Kenali calon pemimpinmu, ikuti setiap tahapan, dan pantau hasil suara secara real-time.
       </p>
 
@@ -204,7 +204,7 @@
 
               <!-- kandidat : image -->
               <div class="relative rounded-2xl overflow-hidden bg-slate-800 aspect-[4/3] mb-5">
-                <img src="{{ $row->image_url }}" alt="kandidat {{ $row->nama }}" class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105">
+                <img src="{{ $row->image_url }}" alt="kandidat {{ $row->nama }}" class="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" width="320" height="256">
                 @if ($dipilih)
                   <span class="absolute z-10 flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white rounded-full shadow-lg top-3 left-3 bg-primary-700">
                     <i data-lucide="badge-check" class="w-4 h-4"></i> Pilihanmu

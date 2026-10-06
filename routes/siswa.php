@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\admin\LoginController as AdminLoginController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\siswa\loginController;
+use App\Http\Controllers\siswa\LoginController;
 use App\Http\Controllers\siswa\VotingController;
 use App\Http\Controllers\siswa\HasilController;
 use GuzzleHttp\Middleware;
