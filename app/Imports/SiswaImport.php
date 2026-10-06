@@ -8,12 +8,21 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Row;
 
 /**
- * Import siswa dari Excel/CSV. Hanya kolom "nama" dan "kelas" yang dibaca;
- * token dibuat otomatis, status dan voted diset 0.
- * Baris bermasalah dicatat (bukan menggagalkan seluruh file).
+ * Import siswa dari Excel/CSV (aman untuk file besar, mis. 1000+ baris).
+ *
+ * - Hanya kolom nama dan kelas yang dibaca; token dibuat otomatis, status/voted = 0.
+ * - Token terpakai dan data lama dimuat SEKALI di awal (bukan query per baris).
+ * - Baris disimpan per batch (bulk insert), bukan satu per satu.
+ * - Baris bermasalah dicatat dan dilaporkan, tidak menggagalkan seluruh file.
  */
 class SiswaImport implements OnEachRow, WithHeadingRow
 {
+    private const UKURAN_BATCH = 200;
+
+    /** judul kolom yang diterima (sudah dalam bentuk slug: huruf kecil, spasi jadi "_") */
+    private const ALIAS_NAMA  = ['nama', 'nama_siswa', 'nama_lengkap', 'name'];
+    private const ALIAS_KELAS = ['kelas', 'class', 'rombel'];
+
     public int $berhasil = 0;
     public bool $kolomHilang = false;
 
@@ -23,13 +32,16 @@ class SiswaImport implements OnEachRow, WithHeadingRow
     /** @var array<int, array{baris:int,nama:string,kelas:string,alasan:string}> */
     public array $gagal = [];
 
-    /** nama|kelas yang sudah ada di database / sudah diimpor pada file ini */
-    private array $sudahAda = [];
+    private array $sudahAda = [];       // "nama|kelas" yang sudah ada / sudah masuk antrean
+    private array $tokenTerpakai = [];  // token (huruf besar) yang sudah dipakai
+    private array $buffer = [];         // antrean insert
+    private ?array $kolom = null;       // ['nama' => ..., 'kelas' => ...] hasil deteksi judul kolom
 
     public function __construct()
     {
-        foreach (Siswa::query()->get(['nama', 'kelas']) as $siswa) {
-            $this->sudahAda[$this->kunci($siswa->nama, $siswa->kelas)] = true;
+        foreach (Siswa::query()->toBase()->get(['token', 'nama', 'kelas']) as $s) {
+            $this->sudahAda[$this->kunci($s->nama, $s->kelas)] = true;
+            $this->tokenTerpakai[strtoupper((string) $s->token)] = true;
         }
     }
 
@@ -42,14 +54,17 @@ class SiswaImport implements OnEachRow, WithHeadingRow
         $baris = $row->getIndex();
         $data  = $row->toArray();
 
-        // judul kolom di baris pertama harus ada
-        if (!array_key_exists('nama', $data) || !array_key_exists('kelas', $data)) {
-            $this->kolomHilang = true;
-            return;
+        // deteksi judul kolom pada baris data pertama
+        if ($this->kolom === null) {
+            $this->kolom = $this->cariKolom($data);
+            if ($this->kolom === null) {
+                $this->kolomHilang = true;
+                return;
+            }
         }
 
-        $nama  = $this->bersihkan($data['nama']);
-        $kelas = $this->bersihkan($data['kelas']);
+        $nama  = $this->bersihkan($data[$this->kolom['nama']] ?? null);
+        $kelas = $this->bersihkan($data[$this->kolom['kelas']] ?? null);
 
         // baris kosong: abaikan tanpa dilaporkan
         if ($nama === '' && $kelas === '') {
@@ -74,21 +89,65 @@ class SiswaImport implements OnEachRow, WithHeadingRow
             $this->duplikat[] = ['baris' => $baris, 'nama' => $nama, 'kelas' => $kelas];
             return;
         }
+        $this->sudahAda[$kunci] = true;
 
-        try {
-            Siswa::create([
+        $this->buffer[] = [
+            'baris' => $baris,
+            'data'  => [
                 'token'  => $this->buatToken(),
                 'nama'   => $nama,
                 'kelas'  => $kelas,
                 'status' => 0,
                 'voted'  => 0,
-            ]);
-            $this->sudahAda[$kunci] = true;
-            $this->berhasil++;
+            ],
+        ];
+
+        if (count($this->buffer) >= self::UKURAN_BATCH) {
+            $this->simpan();
+        }
+    }
+
+    /** Simpan antrean ke database. Dipanggil otomatis tiap batch, dan sekali lagi oleh controller di akhir. */
+    public function simpan(): void
+    {
+        if (!$this->buffer) {
+            return;
+        }
+
+        try {
+            Siswa::insert(array_column($this->buffer, 'data'));
+            $this->berhasil += count($this->buffer);
         } catch (\Throwable $e) {
             report($e);
-            $this->catatGagal($baris, $nama, $kelas, 'Gagal menyimpan ke database');
+
+            // satu batch gagal: coba satu per satu supaya baris bermasalahnya ketahuan
+            foreach ($this->buffer as $item) {
+                try {
+                    Siswa::insert($item['data']);
+                    $this->berhasil++;
+                } catch (\Throwable $e2) {
+                    report($e2);
+                    $this->catatGagal($item['baris'], $item['data']['nama'], $item['data']['kelas'], 'Gagal menyimpan ke database');
+                }
+            }
         }
+
+        $this->buffer = [];
+    }
+
+    private function cariKolom(array $data): ?array
+    {
+        $nama  = null;
+        $kelas = null;
+
+        foreach (self::ALIAS_NAMA as $alias) {
+            if (array_key_exists($alias, $data)) { $nama = $alias; break; }
+        }
+        foreach (self::ALIAS_KELAS as $alias) {
+            if (array_key_exists($alias, $data)) { $kelas = $alias; break; }
+        }
+
+        return ($nama !== null && $kelas !== null) ? ['nama' => $nama, 'kelas' => $kelas] : null;
     }
 
     private function catatGagal(int $baris, string $nama, string $kelas, string $alasan): void
@@ -106,7 +165,7 @@ class SiswaImport implements OnEachRow, WithHeadingRow
         return mb_strtolower(trim($nama)) . '|' . mb_strtolower(trim($kelas));
     }
 
-    /** Token 4 karakter (tanpa O/0/I/1), dijamin belum dipakai. */
+    /** Token 4 karakter (tanpa O/0/I/1), dicek ke daftar di memori, tanpa query per baris. */
     private function buatToken(): string
     {
         $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -117,8 +176,9 @@ class SiswaImport implements OnEachRow, WithHeadingRow
             for ($i = 0; $i < 4; $i++) {
                 $token .= $chars[random_int(0, $max)];
             }
-        } while (Siswa::where('token', $token)->exists());
+        } while (isset($this->tokenTerpakai[$token]));
 
+        $this->tokenTerpakai[$token] = true;
         return $token;
     }
 }

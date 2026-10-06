@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Http\Controllers\admin\SiswaTemplateExport;
+use App\Exports\SiswaTemplateExport;
 use App\Http\Controllers\Controller;
 use App\Imports\SiswaImport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -25,15 +26,26 @@ class ImportController extends Controller
             'file.max'        => 'Ukuran file maksimal 2MB.',
         ]);
 
+        // file besar: beri waktu & memori lebih longgar hanya untuk request ini
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
         $import = new SiswaImport();
 
         try {
-            Excel::import($import, $request->file('file'));
+            // satu transaksi: kalau proses terhenti di tengah jalan (error/timeout), tidak ada data setengah masuk
+            DB::transaction(function () use ($import, $request) {
+                Excel::import($import, $request->file('file'));
+                $import->simpan();
+            });
         } catch (\Throwable $e) {
             report($e);
-            return response()->json([
-                'message' => 'File tidak bisa dibaca. Pastikan file .xlsx, .xls, atau .csv yang valid.',
-            ], 422);
+
+            $pesan = 'File tidak bisa diproses. Pastikan file .xlsx, .xls, atau .csv yang valid.';
+            if (config('app.debug')) {
+                $pesan .= ' [' . class_basename($e) . ': ' . $e->getMessage() . ']';
+            }
+            return response()->json(['message' => $pesan], 422);
         }
 
         if ($import->kolomHilang) {

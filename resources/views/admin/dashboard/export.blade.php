@@ -82,9 +82,9 @@ new class extends Component
             <thead wire:ignore class="bg-slate-100 text-slate-600">
                 <tr>
                     <th class="w-16 p-3 rounded-l-lg">No</th>
-                    <th class="p-3">Token</th>
                     <th class="p-3">Nama</th>
                     <th class="p-3 rounded-r-lg">Kelas</th>
+                    <th class="p-3">Token</th>
                 </tr>
             </thead>
             <tbody id="tabelExport" wire:ignore class="divide-y divide-slate-100"></tbody>
@@ -243,9 +243,9 @@ new class extends Component
         data.forEach(function (s, i) {
             rows += '<tr class="hover:bg-slate-50">'
                   + '<td class="p-3 text-slate-400">' + (i + 1) + '</td>'
-                  + '<td class="p-3 font-mono font-medium text-blue-600">' + esc(s.token) + '</td>'
                   + '<td class="p-3 font-medium text-navy-900">' + esc(s.nama) + '</td>'
                   + '<td class="p-3 font-medium text-navy-900">' + esc(s.kelas) + '</td>'
+                  + '<td class="p-3 font-mono font-medium text-blue-600">' + esc(s.token) + '</td>'
                   + '</tr>';
         });
         if (!rows) {
