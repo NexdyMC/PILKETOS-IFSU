@@ -15,6 +15,8 @@ new class extends Component
      data-url-kandidat="{{ route('kandidat.api.list') }}"
      data-url-import="{{ route('admin.siswa.import') }}"
      data-url-template="{{ route('admin.siswa.template') }}"
+     data-url-update="{{ route('admin.siswa.update') }}"
+     data-url-destroy="{{ route('admin.siswa.destroy') }}"
      data-csrf="{{ csrf_token() }}">
 
     <div class="mb-6">
@@ -24,18 +26,22 @@ new class extends Component
 
     <div class="grid gap-8 lg:grid-cols-3">
 
-        <div class="p-6 overflow-x-auto bg-white border shadow-sm lg:col-span-2 rounded-2xl">
+        <div class="p-6 overflow-x-auto bg-white border shadow-sm lg:col-span-3 rounded-2xl">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h3 class="text-lg font-semibold font-display">Data Pemilih (Siswa)</h3>
 
-                <div class="flex flex-wrap items-center gap-2">
+                <div wire:ignore class="flex flex-wrap items-center gap-2">
                     <button type="button" id="btnImportSiswa"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition bg-white border rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50">
-                        <i class="fa-solid fa-file-excel text-emerald-600"></i> Import Excel
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition border rounded-xl border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                        <i class="fa-solid fa-file-excel"></i> Import Excel
                     </button>
                     <button type="button" id="btnTambahSiswa"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-xl bg-primary-700 hover:bg-primary-600">
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition border border-transparent rounded-xl bg-primary-700 hover:bg-primary-600">
                         <i class="fa-solid fa-user-plus"></i> Tambah Siswa
+                    </button>
+                    <button type="button" id="btnModeSelect"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition border rounded-xl border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100">
+                        <i class="fa-regular fa-square-check"></i> <span>Mode Select</span>
                     </button>
                     <button type="button" id="btnResetVoting"
                             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 transition border border-red-200 rounded-xl bg-red-50 hover:bg-red-100">
@@ -44,10 +50,57 @@ new class extends Component
                 </div>
             </div>
 
+            {{-- pencarian + filter --}}
+            <div wire:ignore class="grid gap-3 mb-3 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr_auto]">
+                <div class="relative">
+                    <i class="absolute text-sm -translate-y-1/2 fa-solid fa-magnifying-glass left-3.5 top-1/2 text-slate-400"></i>
+                    <input id="fSiswaCari" type="search" autocomplete="off" placeholder="Cari nama, kelas, atau token..."
+                           class="w-full py-2.5 pl-10 pr-3 text-sm bg-white border outline-none rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                </div>
+                <select id="fSiswaKelas" class="w-full px-3 py-2.5 text-sm bg-white border outline-none rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                    <option value="">Semua kelas</option>
+                </select>
+                <select id="fSiswaStatus" class="w-full px-3 py-2.5 text-sm bg-white border outline-none rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                    <option value="">Semua status</option>
+                    <option value="sudah">Sudah voting</option>
+                    <option value="belum">Belum voting</option>
+                </select>
+                <select id="fSiswaPilihan" class="w-full px-3 py-2.5 text-sm bg-white border outline-none rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                    <option value="">Semua pilihan</option>
+                    <option value="none">Belum memilih</option>
+                </select>
+                <button type="button" id="fSiswaReset" class="px-4 py-2.5 text-sm font-semibold transition border rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50">
+                    <i class="mr-1.5 fa-solid fa-rotate-left"></i>Reset
+                </button>
+            </div>
+            <p id="infoSiswa" wire:ignore class="mb-3 text-xs text-slate-500"></p>
+
+            {{-- bar aksi Mode Select --}}
+            <div id="barSelect" wire:ignore class="items-center justify-between hidden gap-3 px-4 py-3 mb-4 border rounded-2xl border-violet-200 bg-violet-50">
+                <div class="flex items-center gap-2 text-sm text-violet-800">
+                    <i class="fa-regular fa-square-check"></i>
+                    <span><b id="jumlahTerpilih">0</b> siswa dipilih</span>
+                    <span class="hidden text-xs text-violet-600 sm:inline">&middot; centang siswa, lalu pilih Edit atau Hapus</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="btnEditTerpilih" disabled
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                    </button>
+                    <button type="button" id="btnHapusTerpilih" disabled
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition bg-red-600 rounded-xl hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-trash-can"></i> Hapus
+                    </button>
+                </div>
+            </div>
+
             <table class="w-full text-sm text-left">
                 <thead wire:ignore class="bg-slate-100 text-slate-600">
                     <tr>
-                        <th class="p-3 rounded-l-lg">Token</th>
+                        <th id="thPilih" class="hidden w-10 p-3 rounded-l-lg">
+                            <input type="checkbox" id="pilihSemua" class="w-4 h-4 cursor-pointer accent-violet-600" title="Pilih semua yang tampil">
+                        </th>
+                        <th id="thToken" class="p-3 rounded-l-lg">Token</th>
                         <th class="p-3" aria-sort="none">
                             <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="nama">Nama <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
                         </th>
@@ -132,6 +185,8 @@ new class extends Component
         kandidat: $root.attr('data-url-kandidat'),
         import:   $root.attr('data-url-import'),
         template: $root.attr('data-url-template'),
+        update:   $root.attr('data-url-update'),
+        destroy:  $root.attr('data-url-destroy'),
         csrf:  $root.attr('data-csrf'),
     };
     const TOKEN_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -143,6 +198,12 @@ new class extends Component
     let siswaList = [];
     let kandidatPeta = null;                    // Map id kandidat -> nama (null jika gagal dimuat)
     let urut = { kolom: null, arah: 'asc' };    // urutan tabel: nama | kelas | status | pilihan
+    let kandidatData = null;                    // [{id, nama}] atau null jika gagal dimuat
+    let modeSelect = false;                     // Mode Select aktif?
+    const terpilih = new Set();                 // token siswa yang dicentang
+    const filter = { q: '', kelas: '', status: '', pilihan: '' };
+    let timerCari = null;
+    let kunciFilter = '';                       // penanda isi dropdown filter (agar tidak dibangun ulang sia-sia)
 
     /* ---------- popup modern ---------- */
     const baseModal = {
@@ -205,6 +266,17 @@ new class extends Component
                 opts.contentType = false;
             }
             $.ajax(opts).done(resolve).fail(reject);
+        });
+    }
+
+    // kirim JSON (untuk data berupa array, mis. edit/hapus banyak siswa)
+    function requestJson(url, payload) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url, method: 'POST', data: JSON.stringify(payload),
+                contentType: 'application/json', dataType: 'json',
+                headers: { 'X-CSRF-TOKEN': cfg.csrf, 'X-Requested-With': 'XMLHttpRequest' }
+            }).done(resolve).fail(reject);
         });
     }
 
@@ -307,17 +379,108 @@ new class extends Component
         });
     }
 
+    /* ---------- filter ---------- */
+    function terfilter() {
+        const q = filter.q.trim().toLowerCase();
+
+        return siswaList.filter(function (s) {
+            if (q && String(s.nama).toLowerCase().indexOf(q) === -1
+                  && String(s.kelas).toLowerCase().indexOf(q) === -1
+                  && String(s.token).toLowerCase().indexOf(q) === -1) return false;
+
+            if (filter.kelas && s.kelas !== filter.kelas) return false;
+            if (filter.status === 'sudah' && s.status != 1) return false;
+            if (filter.status === 'belum' && s.status == 1) return false;
+
+            if (filter.pilihan) {
+                const id = s.voted == null ? '' : String(s.voted).trim();
+                const sudahMemilih = !(id === '' || id === '0');
+                if (filter.pilihan === 'none') {
+                    if (sudahMemilih) return false;
+                } else if (!sudahMemilih || id !== filter.pilihan) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+
+    // isi dropdown Kelas dan Pilihan dari data (hanya jika isinya berubah)
+    function isiFilter() {
+        const kelas = [];
+        siswaList.forEach(function (s) { if (kelas.indexOf(s.kelas) === -1) kelas.push(s.kelas); });
+        kelas.sort(bandingTeks);
+
+        const kunci = JSON.stringify([kelas, kandidatData]);
+        if (kunci === kunciFilter) return;
+        kunciFilter = kunci;
+
+        let opsiKelas = '<option value="">Semua kelas</option>';
+        kelas.forEach(function (k) { opsiKelas += '<option value="' + esc(k) + '">' + esc(k) + '</option>'; });
+        if (filter.kelas && kelas.indexOf(filter.kelas) === -1) filter.kelas = '';
+        $('#fSiswaKelas').html(opsiKelas).val(filter.kelas);
+
+        let opsiPilihan = '<option value="">Semua pilihan</option><option value="none">Belum memilih</option>';
+        const idKandidat = [];
+        if (kandidatData) {
+            kandidatData.forEach(function (k) {
+                idKandidat.push(String(k.id));
+                opsiPilihan += '<option value="' + esc(k.id) + '">' + esc(k.nama) + '</option>';
+            });
+        }
+        if (filter.pilihan && filter.pilihan !== 'none' && idKandidat.indexOf(filter.pilihan) === -1) filter.pilihan = '';
+        $('#fSiswaPilihan').html(opsiPilihan).val(filter.pilihan);
+    }
+
+    /* ---------- mode select ---------- */
+    const BTN_MODE = 'inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition border rounded-xl';
+
+    function perbaruiSelect(tampil) {
+        $('#jumlahTerpilih').text(terpilih.size);
+        $('#btnEditTerpilih, #btnHapusTerpilih').prop('disabled', terpilih.size === 0);
+
+        const tokenTampil = (tampil || urutkan(terfilter())).map(function (s) { return String(s.token); });
+        const jumlah = tokenTampil.filter(function (t) { return terpilih.has(t); }).length;
+        const $semua = $('#pilihSemua');
+        if ($semua.length) {
+            $semua.prop('checked', tokenTampil.length > 0 && jumlah === tokenTampil.length);
+            $semua.prop('indeterminate', jumlah > 0 && jumlah < tokenTampil.length);
+        }
+    }
+
+    function terapkanModeSelect() {
+        $('#btnModeSelect')
+            .attr('class', BTN_MODE + (modeSelect
+                ? ' text-white bg-violet-600 border-violet-600 hover:bg-violet-500'
+                : ' text-violet-700 border-violet-200 bg-violet-50 hover:bg-violet-100'))
+            .find('span').text(modeSelect ? 'Keluar Mode Select' : 'Mode Select');
+
+        $('#barSelect').toggleClass('hidden', !modeSelect).toggleClass('flex', modeSelect);
+        $('#thPilih').toggleClass('hidden', !modeSelect);
+        $('#thToken').toggleClass('rounded-l-lg', !modeSelect);
+        renderTabel();
+    }
+
     function renderTabel() {
         if (!aktif()) return;
 
+        const tampil = urutkan(terfilter());
+
         let rows = '';
-        $.each(urutkan(siswaList), function (i, s) {
+        $.each(tampil, function (i, s) {
+            const token   = String(s.token);
+            const dipilih = terpilih.has(token);
             const status = s.status == 1
                 ? '<span class="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded">Sudah</span>'
                 : '<span class="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded">Belum</span>';
-            rows += `<tr class="hover:bg-slate-50">
+            const kolomPilih = modeSelect
+                ? '<td class="w-10 p-3"><input type="checkbox" class="w-4 h-4 cursor-pointer chk-siswa accent-violet-600" data-token="' + esc(token) + '"' + (dipilih ? ' checked' : '') + '></td>'
+                : '';
+
+            rows += `<tr class="baris-siswa ${dipilih ? 'bg-violet-50' : 'hover:bg-slate-50'} ${modeSelect ? 'cursor-pointer' : ''}" data-token="${esc(token)}">
+                ${kolomPilih}
                 <td class="p-3">
-                    <button type="button" class="inline-flex items-center gap-2 font-mono font-medium text-blue-600 transition-colors btn-copy-token hover:text-blue-800" data-token="${esc(s.token)}"> ${esc(s.token)}<i class="text-xs fa-regular fa-copy text-slate-400"></i></button>
+                    <button type="button" class="inline-flex items-center gap-2 font-mono font-medium text-blue-600 transition-colors btn-copy-token hover:text-blue-800" data-token="${esc(token)}"> ${esc(token)}<i class="text-xs fa-regular fa-copy text-slate-400"></i></button>
                 </td>
                 <td class="p-3 font-medium text-navy-900">${esc(s.nama)}</td>
                 <td class="p-3 font-medium text-navy-900">${esc(s.kelas)}</td>
@@ -325,8 +488,14 @@ new class extends Component
                 <td class="p-3">${pilihanBadge(s, kandidatPeta)}</td>
             </tr>`;
         });
+        if (!rows) {
+            rows = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Tidak ada siswa yang cocok dengan filter.</td></tr>';
+        }
         $('#tabel-siswa').html(rows);
+
+        $('#infoSiswa').text('Menampilkan ' + tampil.length + ' dari ' + siswaList.length + ' siswa');
         perbaruiIkonUrut();
+        perbaruiSelect(tampil);
     }
 
     function loadSiswa() {
@@ -342,11 +511,17 @@ new class extends Component
             if (!aktif()) return;
 
             siswaList = hasil[0];
-            kandidatPeta = hasil[1]
-                ? new Map(hasil[1].data.map(function (k) { return [String(k.id), k.nama]; }))
+            kandidatData = hasil[1] ? hasil[1].data : null;
+            kandidatPeta = kandidatData
+                ? new Map(kandidatData.map(function (k) { return [String(k.id), k.nama]; }))
                 : null;
 
-            renderTabel();   // urutan pilihan pengguna tetap dipakai saat auto-refresh
+            // buang centang siswa yang sudah tidak ada
+            const ada = new Set(siswaList.map(function (s) { return String(s.token); }));
+            terpilih.forEach(function (t) { if (!ada.has(t)) terpilih.delete(t); });
+
+            isiFilter();
+            renderTabel();   // urutan, filter, dan centang tetap dipakai saat auto-refresh
         }).catch(function (xhr) {
             console.error('Gagal ambil data siswa:', xhr);
         });
@@ -547,6 +722,157 @@ new class extends Component
         });
     }
 
+    /* ---------- edit siswa terpilih ---------- */
+    const SEL_CELL = 'w-full px-3 py-2 text-sm bg-white border outline-none rounded-lg border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100';
+
+    function suaraAsal(s) {
+        return (s.status == 1 && s.voted != null && String(s.voted) !== '0') ? String(s.voted) : '';
+    }
+
+    // Status: "Belum memilih" atau "Sudah - nama kandidat" (status dan pilihan selalu konsisten)
+    function opsiStatus(s) {
+        const asal = suaraAsal(s);
+        let html = '<option value=""' + (asal === '' ? ' selected' : '') + '>Belum memilih</option>';
+        let ada = false;
+
+        if (kandidatData) {
+            kandidatData.forEach(function (k) {
+                const id = String(k.id);
+                if (id === asal) ada = true;
+                html += '<option value="' + esc(id) + '"' + (id === asal ? ' selected' : '') + '>Sudah - ' + esc(k.nama) + '</option>';
+            });
+        }
+        if (asal !== '' && !ada) {
+            html += '<option value="' + esc(asal) + '" selected>Sudah (kandidat tidak ditemukan)</option>';
+        }
+        return html;
+    }
+
+    function dataTerpilih() {
+        return siswaList.filter(function (s) { return terpilih.has(String(s.token)); });
+    }
+
+    function editTerpilih() {
+        const data = dataTerpilih();
+        if (!data.length) return;
+        if (data.length > 500) {
+            toast('error', 'Maksimal 500 siswa sekali edit. Kurangi pilihanmu.');
+            return;
+        }
+
+        const asalMap = Object.create(null);
+        let rows = '';
+        data.forEach(function (s) {
+            asalMap[String(s.token)] = s;
+            rows += '<tr data-token="' + esc(s.token) + '" class="border-t border-slate-100">'
+                  + '<td class="px-3 py-2 font-mono text-xs font-semibold whitespace-nowrap text-primary-700">' + esc(s.token) + '</td>'
+                  + '<td class="px-2 py-2"><input type="text" maxlength="100" class="ed-nama ' + SEL_CELL + '" value="' + esc(s.nama) + '"></td>'
+                  + '<td class="px-2 py-2"><input type="text" maxlength="50" class="ed-kelas ' + SEL_CELL + '" value="' + esc(s.kelas) + '"></td>'
+                  + '<td class="px-2 py-2"><select class="ed-status ' + SEL_CELL + '">' + opsiStatus(s) + '</select></td>'
+                  + '</tr>';
+        });
+
+        Modal.fire({
+            width: '50rem',
+            html: header('fa-solid fa-pen-to-square', 'bg-amber-50 text-amber-600', 'Edit Data Siswa',
+                         data.length + ' siswa dipilih. Ubah nama, kelas, atau status, lalu klik Edit.') + `
+                <div class="px-6 pb-1">
+                    <div class="overflow-auto border max-h-[50vh] rounded-2xl border-slate-200">
+                        <table class="w-full text-sm">
+                            <thead class="sticky top-0 z-10 text-xs text-left bg-slate-100 text-slate-600">
+                                <tr>
+                                    <th class="px-3 py-2.5">Token</th>
+                                    <th class="px-3 py-2.5">Nama</th>
+                                    <th class="px-3 py-2.5">Kelas</th>
+                                    <th class="px-3 py-2.5">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500">Token tidak dapat diubah. Mengubah status ke "Belum memilih" menghapus suara siswa tersebut.</p>
+                </div>`,
+            showCancelButton: true,
+            confirmButtonText: 'Edit',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            didOpen: () => { $(Swal.getHtmlContainer()).find('.ed-nama').first().trigger('focus'); },
+            preConfirm: () => {
+                const perubahan = [];
+                let galat = '';
+
+                $(Swal.getHtmlContainer()).find('tr[data-token]').each(function () {
+                    const token = $(this).attr('data-token');
+                    const asal  = asalMap[token];
+                    const nama  = $(this).find('.ed-nama').val().trim();
+                    const kelas = $(this).find('.ed-kelas').val().trim();
+                    const voted = $(this).find('.ed-status').val();
+
+                    if (!nama || !kelas) {
+                        galat = 'Nama dan kelas tidak boleh kosong (token ' + token + ').';
+                        return false;
+                    }
+                    if (nama !== String(asal.nama).trim() || kelas !== String(asal.kelas).trim() || voted !== suaraAsal(asal)) {
+                        perubahan.push({ token: token, nama: nama, kelas: kelas, voted: voted === '' ? null : voted });
+                    }
+                });
+
+                if (galat) { Swal.showValidationMessage(galat); return false; }
+                if (!perubahan.length) { Swal.showValidationMessage('Belum ada data yang diubah.'); return false; }
+
+                return requestJson(cfg.update, { siswa: perubahan })
+                    .catch((xhr) => { Swal.showValidationMessage(pesanError(xhr)); return false; });
+            }
+        }).then((result) => {
+            if (!result.isConfirmed || !result.value) return;
+            toast('success', result.value.message, 3000);
+            terpilih.clear();
+            loadSiswa();
+        });
+    }
+
+    /* ---------- hapus siswa terpilih ---------- */
+    function hapusTerpilih() {
+        const data = dataTerpilih();
+        if (!data.length) return;
+        if (data.length > 2000) {
+            toast('error', 'Maksimal 2000 siswa sekali hapus. Kurangi pilihanmu.');
+            return;
+        }
+
+        const sudah  = data.filter(function (s) { return s.status == 1; }).length;
+        const sisa   = data.length - 5;
+        const contoh = data.slice(0, 5).map(function (s) {
+            return '<li class="flex justify-between gap-3"><span class="font-medium truncate text-slate-800">' + esc(s.nama)
+                 + '</span><span class="text-slate-400 shrink-0">' + esc(s.kelas) + '</span></li>';
+        }).join('');
+
+        ModalDanger.fire({
+            html: header('fa-solid fa-trash-can', 'bg-red-50 text-red-600', 'Hapus ' + data.length + ' siswa?',
+                         'Data yang dihapus tidak bisa dikembalikan dan token mereka tidak berlaku lagi.') + `
+                <div class="px-6 pb-1 space-y-3">
+                    <ul class="p-3 space-y-1.5 text-sm border rounded-2xl border-slate-200 bg-slate-50">
+                        ${contoh}
+                        ${sisa > 0 ? '<li class="text-xs text-slate-400">... dan ' + sisa + ' siswa lainnya</li>' : ''}
+                    </ul>
+                    ${sudah > 0 ? '<div class="p-3 text-xs leading-relaxed border rounded-xl border-amber-200 bg-amber-50 text-amber-800"><b>' + sudah + '</b> di antaranya sudah memilih. Suara mereka ikut terhapus dari hasil pemilihan.</div>' : ''}
+                </div>`,
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            preConfirm: () => requestJson(cfg.destroy, { tokens: data.map(function (s) { return String(s.token); }) })
+                .catch((xhr) => { Swal.showValidationMessage(pesanError(xhr)); return false; })
+        }).then((result) => {
+            if (!result.isConfirmed || !result.value) return;
+            toast('success', result.value.message, 3000);
+            terpilih.clear();
+            loadSiswa();
+        });
+    }
+
     /* ---------- events (delegasi, namespace .siswa) ---------- */
     // klik judul kolom: naik -> turun -> kembali ke urutan awal
     $(document).on('click' + NS, '.btn-sort', function () {
@@ -557,6 +883,55 @@ new class extends Component
         else                           urut = { kolom: null, arah: 'asc' };
 
         renderTabel();
+    });
+
+    // ---- filter ----
+    $(document).on('input' + NS, '#fSiswaCari', function () {
+        const nilai = this.value;
+        clearTimeout(timerCari);
+        timerCari = setTimeout(function () { filter.q = nilai; renderTabel(); }, 200);
+    });
+    $(document).on('change' + NS, '#fSiswaKelas',   function () { filter.kelas   = this.value; renderTabel(); });
+    $(document).on('change' + NS, '#fSiswaStatus',  function () { filter.status  = this.value; renderTabel(); });
+    $(document).on('change' + NS, '#fSiswaPilihan', function () { filter.pilihan = this.value; renderTabel(); });
+    $(document).on('click' + NS, '#fSiswaReset', function () {
+        filter.q = ''; filter.kelas = ''; filter.status = ''; filter.pilihan = '';
+        $('#fSiswaCari').val('');
+        $('#fSiswaKelas, #fSiswaStatus, #fSiswaPilihan').val('');
+        renderTabel();
+    });
+
+    // ---- mode select ----
+    $(document).on('click' + NS, '#btnModeSelect', function () {
+        modeSelect = !modeSelect;
+        if (!modeSelect) terpilih.clear();
+        terapkanModeSelect();
+    });
+    $(document).on('change' + NS, '.chk-siswa', function () {
+        const token = $(this).attr('data-token');
+        if (this.checked) terpilih.add(token); else terpilih.delete(token);
+        $(this).closest('tr').toggleClass('bg-violet-50', this.checked).toggleClass('hover:bg-slate-50', !this.checked);
+        perbaruiSelect();
+    });
+    $(document).on('change' + NS, '#pilihSemua', function () {
+        const centang = this.checked;
+        urutkan(terfilter()).forEach(function (s) {
+            const t = String(s.token);
+            if (centang) terpilih.add(t); else terpilih.delete(t);
+        });
+        renderTabel();
+    });
+    // klik di mana saja pada baris = centang/batal centang
+    $(document).on('click' + NS, '.baris-siswa', function (e) {
+        if (!modeSelect) return;
+        if ($(e.target).closest('button, input, a').length) return;
+        const $chk = $(this).find('.chk-siswa');
+        $chk.prop('checked', !$chk.prop('checked')).trigger('change');
+    });
+    $(document).on('click' + NS, '#btnEditTerpilih', editTerpilih);
+    $(document).on('click' + NS, '#btnHapusTerpilih', hapusTerpilih);
+    $(document).on('keydown' + NS, '.ed-nama, .ed-kelas', function (e) {
+        if (e.key === 'Enter') Swal.clickConfirm();
     });
 
     $(document).on('click' + NS, '#btnImportSiswa', importExcel);

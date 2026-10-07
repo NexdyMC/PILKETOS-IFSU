@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\admin;
 
-use App\Exports\SiswaTemplateExport;
+use App\Http\Controllers\admin\SiswaTemplateExport;
 use App\Http\Controllers\Controller;
 use App\Imports\SiswaImport;
 use Illuminate\Http\JsonResponse;

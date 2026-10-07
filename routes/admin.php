@@ -37,10 +37,14 @@ Route::get('/admin/dashboard/settings', Settings::class)->name('admin.dashboard.
 
 Route::get('/admin/dashboard/export', Export::class)->name('admin.dashboard.export');
 
-/* ---------- siswa: tambah & reset voting ---------- */
+/* ---------- siswa: Crud and & Reset ---------- */
 Route::post('/admin/siswa', [SiswaController::class, 'store'])->name('admin.siswa.store');
 
 Route::post('/admin/siswa/reset', [SiswaController::class, 'reset'])->name('admin.siswa.reset');
+
+Route::post('/admin/siswa/ubah', [SiswaController::class, 'ubah'])->name('admin.siswa.update');
+
+Route::post('/admin/siswa/hapus', [SiswaController::class, 'hapus'])->name('admin.siswa.destroy');
 
 /* ---------- import data siswa (ImportController) ---------- */
 Route::post('/admin/siswa/import', [ImportController::class, 'import'])->name('admin.siswa.import');
