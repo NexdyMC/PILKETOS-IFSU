@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Settings;
 use App\Models\Kandidat;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
@@ -36,7 +37,12 @@ class DashboardController extends Controller
 
     public function apiSiswa() 
     {
-        $siswa = Siswa::all();
-        return response()->json($siswa);
+        $data = Siswa::all();
+
+        if (!Settings::ambil()->view_voted) {
+            $data = collect($data)->map(fn ($s) => collect($s)->except('voted')->all())->values();
+        }
+
+        return response()->json($data);
     }
 }

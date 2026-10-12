@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\admin\LoginController as AdminLoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\siswa\LoginController;
 use App\Http\Controllers\siswa\VotingController;
@@ -8,14 +7,14 @@ use App\Http\Controllers\siswa\HasilController;
 use GuzzleHttp\Middleware;
 
 Route::middleware(['siswa.guest'])->group(function () {
-  Route::get('/siswa', [loginController::class, 'index'])->name('siswa.index');
+  Route::get('/siswa', [LoginController::class, 'index'])->name('siswa.index');
 
-  Route::get('/siswa/login', [loginController::class, 'index'])->name('siswa.login');
+  Route::get('/siswa/login', [LoginController::class, 'index'])->name('siswa.login');
 });
 
-Route::post('/siswa/check', [loginController::class, 'login'])->name('siswa.check');
+Route::post('/siswa/check', [LoginController::class, 'login'])->name('siswa.check');
 
-Route::get('/siswa/logout', [loginController::class, 'logout'])->name('siswa.logout');
+Route::get('/siswa/logout', [LoginController::class, 'logout'])->name('siswa.logout');
 
 Route::middleware(['siswa.token'])->group(function () {
 

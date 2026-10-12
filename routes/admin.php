@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\admin\LoginController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\UploadController;
@@ -8,6 +9,8 @@ use App\Http\Controllers\admin\KandidatController;
 use App\Http\Controllers\admin\SiswaController;
 use App\Http\Controllers\admin\ExportController;
 use App\Http\Controllers\admin\ImportController;
+use App\Http\Controllers\admin\SettingsController;
+use App\Http\Middleware\AdminMiddleware;
 use App\Livewire\Dashboard\Home;
 use App\Livewire\Dashboard\Siswa;
 use App\Livewire\Dashboard\Kandidat;
@@ -26,44 +29,45 @@ Route::get('/admin/upload', [UploadController::class, 'create'])->name('admin.up
 
 Route::post('/admin/upload', [UploadController::class, 'store'])->name('kandidat.store');
 
-/* ---------- halaman dashboard (Livewire) ---------- */
-Route::get('/admin/dashboard', Home::class)->name('admin.dashboard');
+Route::middleware(AdminMiddleware::class)->group(function () {
 
-Route::get('/admin/dashboard/kandidat', Kandidat::class)->name('admin.dashboard.kandidat');
+    /* ---------- upload kandidat ---------- */
+    Route::get('/admin/upload', [UploadController::class, 'create'])->name('admin.upload');
+    Route::post('/admin/upload', [UploadController::class, 'store'])->name('kandidat.store');
 
-Route::get('/admin/dashboard/siswa', Siswa::class)->name('admin.dashboard.siswa');
+    /* ---------- halaman dashboard (Livewire) ---------- */
+    Route::get('/admin/dashboard', Home::class)->name('admin.dashboard');
+    Route::get('/admin/dashboard/kandidat', Kandidat::class)->name('admin.dashboard.kandidat');
+    Route::get('/admin/dashboard/siswa', Siswa::class)->name('admin.dashboard.siswa');
+    Route::get('/admin/dashboard/settings', Settings::class)->name('admin.dashboard.settings');
+    Route::get('/admin/dashboard/export', Export::class)->name('admin.dashboard.export');
 
-Route::get('/admin/dashboard/settings', Settings::class)->name('admin.dashboard.settings');
+    /* ---------- siswa: CRUD & reset ---------- */
+    Route::post('/admin/siswa', [SiswaController::class, 'store'])->name('admin.siswa.store');
+    Route::post('/admin/siswa/reset', [SiswaController::class, 'reset'])->name('admin.siswa.reset');
+    Route::post('/admin/siswa/ubah', [SiswaController::class, 'ubah'])->name('admin.siswa.update');
+    Route::post('/admin/siswa/hapus', [SiswaController::class, 'hapus'])->name('admin.siswa.destroy');
 
-Route::get('/admin/dashboard/export', Export::class)->name('admin.dashboard.export');
+    /* ---------- import & export ---------- */
+    Route::post('/admin/siswa/import', [ImportController::class, 'import'])->name('admin.siswa.import');
+    Route::get('/admin/siswa/template', [ImportController::class, 'template'])->name('admin.siswa.template');
+    Route::get('/admin/export/pdf', [ExportController::class, 'pdf'])->name('admin.export.pdf');
+    Route::get('/admin/export/pdf-per-kelas', [ExportController::class, 'pdfPerKelas'])->name('admin.export.pdfkelas');
+    Route::get('/admin/export/excel', [ExportController::class, 'excel'])->name('admin.export.excel');
 
-/* ---------- siswa: Crud and & Reset ---------- */
-Route::post('/admin/siswa', [SiswaController::class, 'store'])->name('admin.siswa.store');
+    /* ---------- kandidat (API JSON) ---------- */
+    Route::prefix('admin/kandidat')->group(function () {
+        Route::get('data', [KandidatController::class, 'list'])->name('kandidat.api.list');
+        Route::post('/', [KandidatController::class, 'store'])->name('kandidat.api.store');
+        Route::put('{kandidat}', [KandidatController::class, 'update'])->name('kandidat.api.update');
+        Route::delete('{kandidat}', [KandidatController::class, 'destroy'])->name('kandidat.api.destroy');
+    });
 
-Route::post('/admin/siswa/reset', [SiswaController::class, 'reset'])->name('admin.siswa.reset');
+    /* ---------- API JSON dashboard ---------- */
+    Route::get('/api/admin/siswa', [DashboardController::class, 'apiSiswa']);
 
-Route::post('/admin/siswa/ubah', [SiswaController::class, 'ubah'])->name('admin.siswa.update');
-
-Route::post('/admin/siswa/hapus', [SiswaController::class, 'hapus'])->name('admin.siswa.destroy');
-
-/* ---------- import data siswa (ImportController) ---------- */
-Route::post('/admin/siswa/import', [ImportController::class, 'import'])->name('admin.siswa.import');
-
-Route::get('/admin/siswa/template', [ImportController::class, 'template'])->name('admin.siswa.template');
-
-/* ---------- export data siswa (ExportController) ---------- */
-Route::get('/admin/export/pdf', [ExportController::class, 'pdf'])->name('admin.export.pdf');
-
-Route::get('/admin/export/pdf-per-kelas', [ExportController::class, 'pdfPerKelas'])->name('admin.export.pdfkelas');
-
-Route::get('/admin/export/excel', [ExportController::class, 'excel'])->name('admin.export.excel');
-
-/* ---------- kandidat (API JSON) ---------- */
-Route::prefix('admin/kandidat')->group(function () {
-    Route::get('data', [KandidatController::class, 'list'])->name('kandidat.api.list');
-    Route::post('/', [KandidatController::class, 'store'])->name('kandidat.api.store');
-    Route::put('{kandidat}', [KandidatController::class, 'update'])->name('kandidat.api.update');
-    Route::delete('{kandidat}', [KandidatController::class, 'destroy'])->name('kandidat.api.destroy');
+    /* ---------- Settings (API JSON) ---------- */
+    Route::get('/api/admin/settings', [SettingsController::class, 'index'])->name('admin.settings.data');
+    Route::post('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
+    Route::post('/admin/settings/voting', [SettingsController::class, 'toggleVoting'])->name('admin.settings.voting');
 });
-
-Route::get('/api/admin/siswa', [DashboardController::class, 'apiSiswa']);

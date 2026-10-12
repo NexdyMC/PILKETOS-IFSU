@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Aplikasi E-Vote OSIS Untuk SMK INFORMATIKA SUMEDANG" />
+    <link rel="canonical" href="https://evoteosisifsu-xyz.co.id">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    
+
     <title>Login Siswa — E-Voting OSIS</title>
     
     <!-- link : CDN -->
@@ -17,23 +22,23 @@
 </head>
 
 <body class="bg-[#0F172A] min-h-screen flex flex-col justify-between items-center p-4 font-sans text-slate-800">
-    <main class="w-full max-w-md py-6 my-auto">
+    <main class="py-6 my-auto w-full max-w-md">
         <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border-t-8 border-[#FACC15] relative overflow-hidden">
             <!-- Branding 3 Logo (SMK, IFSU [Tengah Besar], OSIS) -->
             <div class="flex flex-col items-center mb-2 text-center">
-                <div class="flex items-center justify-center gap-5 mb-6">
+                <div class="flex gap-5 justify-center items-center mb-6">
                 
                     <!-- 1. Logo SMK (Kiri - Ukuran Sedang) -->
                     <img src="../assets/images/logo-osis.png" alt="Logo SMK"
-                        class="object-contain w-auto h-20 p-2 duration-300 bg-gray-100 rounded-full drop-shadow-md hover:scale-110" width="80" height="80">
+                        class="p-2 w-auto h-20 bg-gray-100 rounded-full object-contain duration-300 drop-shadow-md hover:scale-110" width="80" height="80">
 
                     <!-- 2. Logo IFSU (Tengah - Ukuran Lebih Besar) -->
                     <img src="../assets/images/logo-smk.png" alt="Logo IFSU"
-                        class="object-contain w-auto h-24 p-2 duration-300 scale-105 bg-gray-100 rounded-full drop-shadow-md hover:scale-110" width="100" height="100">
+                        class="p-2 w-auto h-24 bg-gray-100 rounded-full object-contain duration-300 scale-105 drop-shadow-md hover:scale-110" width="100" height="100">
 
                     <!-- 3. Logo OSIS (Kanan - Ukuran Sedang) -->
                     <img src="../assets/images/logo-mpk.png" alt="Logo OSIS"
-                        class="object-contain w-auto h-20 p-2 duration-300 bg-gray-100 rounded-full drop-shadow-md hover:scale-110" width="80" height="80" >
+                        class="p-2 w-auto h-20 bg-gray-100 rounded-full object-contain duration-300 drop-shadow-md hover:scale-110" width="80" height="80" >
                 </div>
                 
 
@@ -41,9 +46,9 @@
                     Login Pemilihan Osis
                 </h1>
                 <p class="mb-2 text-xs text-center sm:text-sm text-slate-600">
-                    Masukkan Token Anda untuk memulai votin.
+                    Masukkan Token Anda untuk memulai voting.
                 </p>
-                <form id="form-login" class="w-full space-y-5">
+                <form id="form-login" class="space-y-5 w-full">
                     <div id="pesan-error" class="hidden"></div>
                     <label for="token" class="block mb-2 text-xs font-bold tracking-wider text-left uppercase text-slate-700">
                         Kode Token Voting

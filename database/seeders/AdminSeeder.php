@@ -15,8 +15,8 @@ class AdminSeeder extends Seeder
         DB::table('tb_admin')->insert([
             'admin'      => 'Febri Pratama',
             'kelas'      => '12 RPL 1',
-            'username'   => 'admin',
-            'password'   => 'piketos2026',
+            'username'   => 'febri pratama',
+            'password'   => 'pilketos2026',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

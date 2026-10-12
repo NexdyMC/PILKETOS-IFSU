@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kandidat;
+use App\Models\Settings;
 use App\Models\Siswa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class SiswaController extends Controller
             'siswa.*.token' => ['required', 'string', 'max:20'],
             'siswa.*.nama'  => ['required', 'string', 'max:100'],
             'siswa.*.kelas' => ['required', 'string', 'max:50'],
-            'siswa.*.voted' => ['nullable', 'integer', 'min:0'],
+            'siswa.*.voted' => ['sometimes', 'nullable', 'integer', 'min:0'],
         ], [
             'siswa.required'         => 'Tidak ada data yang dikirim.',
             'siswa.max'              => 'Maksimal 500 siswa sekali edit.',
@@ -84,16 +85,23 @@ class SiswaController extends Controller
             }
         }
 
-        DB::transaction(function () use ($data) {
-            foreach ($data['siswa'] as $row) {
-                $voted = (int) ($row['voted'] ?? 0);
+        $bolehUbahSuara = Settings::ambil()->view_voted;
 
-                Siswa::where('token', $row['token'])->update([
-                    'nama'   => trim($row['nama']),
-                    'kelas'  => trim($row['kelas']),
-                    'status' => $voted > 0 ? 1 : 0,   // status selalu konsisten dengan pilihan
-                    'voted'  => $voted,
-                ]);
+        DB::transaction(function () use ($data, $bolehUbahSuara) {
+            foreach ($data['siswa'] as $row) {
+                $isi = [
+                    'nama'  => trim($row['nama']),
+                    'kelas' => trim($row['kelas']),
+                ];
+
+                // suara hanya disentuh kalau fitur aktif DAN field voted memang dikirim
+                if ($bolehUbahSuara && array_key_exists('voted', $row)) {
+                    $voted = (int) ($row['voted'] ?? 0);
+                    $isi['status'] = $voted > 0 ? 1 : 0;
+                    $isi['voted']  = $voted;
+                }
+
+                Siswa::where('token', $row['token'])->update($isi);
             }
         });
 

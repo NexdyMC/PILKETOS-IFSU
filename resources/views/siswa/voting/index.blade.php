@@ -1,3 +1,8 @@
+@php
+  $pengaturan = \App\Models\Settings::ambil();
+  $votingBuka = $pengaturan->votingBuka();
+@endphp
+
 @extends('layouts.siswa.app')
 
 @section('cdn')
@@ -12,20 +17,20 @@
 
 @section('content')
   <div class="space-y-4 text-center">
-    <div class="mx-auto space-y-3 text-center max-w-7xl">
+    <div class="mx-auto space-y-3 max-w-7xl text-center">
       <div class="py-6 space-y-3 md:space-y-4">
 
         <div class="flex justify-center">
-          <div class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 text-white transition-all shadow-md bg-gradient-to-br from-amber-500 to-amber-300 rounded-xl">
+          <div class="flex justify-center items-center w-16 h-16 text-white bg-gradient-to-br from-amber-500 to-amber-300 rounded-xl md:w-20 md:h-20 transition-all shadow-md">
             <i class="text-[32px] md:text-[40px] fa-solid fa-users"></i>
           </div>
         </div>
 
-        <h1 class="text-3xl md:text-5xl font-extrabold text-center text-slate-800">Voting <span class="text-[#FACC15]">OSIS</span></h1>
+        <h1 class="text-3xl font-extrabold text-center md:text-5xl text-slate-800">Voting <span class="text-[#FACC15]">Kandidat OSIS</span></h1>
         <p class="text-gray-600">Pilih calon ketua OSIS yang menurut Anda paling tepat</p>
 
-        <div class="flex items-start gap-4 p-4 my-6 transition-all border-l-4 shadow-lg bg-amber-300/20 border-amber-300/80 border-l-amber-300 rounded-2xl sm:p-5 sm:items-center">
-          <div class="flex items-center justify-center w-10 h-10 text-white rounded-xl bg-amber-400 shrink-0">
+        <div class="flex gap-4 items-start p-4 my-6 rounded-2xl border-l-4 transition-all shadow-lg bg-amber-300/20 border-amber-300/80 border-l-amber-300 sm:p-5 sm:items-center">
+          <div class="flex justify-center items-center w-10 h-10 text-white bg-amber-400 rounded-xl shrink-0">
             <i class="text-[20px] fa-solid fa-info"></i>
           </div>
           <div class="flex-1 min-w-0">
@@ -39,47 +44,54 @@
     </div>
   </div>
 
-  <div class="relative flex items-center justify-center gap-4 max-w-7xl">
-    <div id="scroll-container" class="grid h-full grid-cols-1 gap-4 md:grid-cols-3">
+  <div class="flex relative gap-4 justify-center items-center max-w-7xl">
+    <div id="scroll-container" class="grid grid-cols-1 gap-4 h-full md:grid-cols-3">
       @foreach ($kandidat as $index => $row)
-        <div class="relative flex flex-col w-full h-full overflow-hidden transition-all duration-300 bg-white border-2 shadow-md cursor-pointer rounded-3xl hover:-translate-y-2 md:hover:-translate-y-4 hover:shadow-xl hover:border-blue-500 border-slate-300/80 group kandidat-item"
+        <div class="flex overflow-hidden relative flex-col w-full h-full bg-white rounded-3xl border-2 transition-all duration-300 shadow-md cursor-pointer hover:-translate-y-2 md:hover:-translate-y-4 hover:shadow-xl hover:border-blue-500 border-slate-300/80 group kandidat-item"
           data-id="{{ $row->id }}"
           data-nama="{{ $row->nama }}"
-          data-image="{{ asset('/upload/photo/' . $row->image) }}"
+          data-image="{{ $row->image_url }}"
           tabindex="0" role="button"
           aria-haspopup="dialog"
           aria-label="Lihat visi dan misi {{ $row->nama }}">
 
           <div class="relative border-b-2 overflow-hidden bg-slate-800 aspect-[4/3] shrink-0">
-            <img src="{{ asset('/upload/photo/' . $row->image) }}" alt="{{ $row->nama }}"
-              class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105">
+            <img src="{{ $row->image_url }}" alt="{{ $row->nama }}" width="400" height="300"
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
           </div>
 
           <div class="grid gap-4 p-4">
             <h3 class="text-2xl font-bold text-center text-slate-800 shrink-0">{{ $row->nama }}</h3>
 
             <div class="flex justify-center shrink-0">
-              <span class="p-2 py-1 text-sm font-bold tracking-widest text-white border rounded-full bg-gradient-to-br from-amber-500 to-amber-300">
+              <span class="p-2 py-1 text-sm font-bold tracking-widest text-white bg-gradient-to-br from-amber-500 to-amber-300 rounded-full border">
                 Calon Ketua OSIS
               </span>
             </div>
 
-            <div class="z-10 space-y-4 overflow-hidden bg-white shrink-0">
+            <div class="overflow-hidden z-10 space-y-4 bg-white shrink-0">
               {{-- Tombol Visi & Misi (tanpa data duplikat, data diambil dari kartu) --}}
               <button type="button"
-                class="flex items-center justify-center w-full gap-2 px-5 py-3 text-sm font-semibold text-yellow-600 transition-colors bg-white border-2 border-yellow-600 btn-detail rounded-xl hover:bg-yellow-600 hover:text-white">
+                class="flex gap-2 justify-center items-center px-5 py-3 w-full text-sm font-semibold text-yellow-600 bg-white rounded-xl border-2 border-yellow-600 transition-colors btn-detail hover:bg-yellow-600 hover:text-white">
                 <i class="text-[16px] fa-solid fa-book-open"></i>
                 Lihat Visi &amp; Misi
               </button>
 
-              {{-- Tombol Vote: membawa id & nama kandidat (class, BUKAN id duplikat) --}}
-              <button type="button"
-                data-id="{{ $row->id }}"
-                data-nama="{{ $row->nama }}"
-                class="flex items-center justify-center w-full gap-2 px-5 py-3 text-sm font-semibold text-blue-600 transition-colors bg-white border-2 border-blue-600 btn-vote rounded-xl hover:bg-blue-600 hover:text-white">
-                <i class="text-[16px] fa-solid fa-check-to-slot"></i>
-                Pilih Kandidat Ini
-              </button>
+              @if ($votingBuka)
+                <button type="button"
+                  data-id="{{ $row->id }}"
+                  data-nama="{{ $row->nama }}"
+                  class="flex gap-2 justify-center items-center px-5 py-3 w-full text-sm font-semibold text-blue-600 bg-white rounded-xl border-2 border-blue-600 transition-colors btn-vote hover:bg-blue-600 hover:text-white">
+                  <i class="text-[16px] fa-solid fa-check-to-slot"></i>
+                  Pilih Kandidat Ini
+                </button>
+              @else
+                <button type="button" disabled aria-disabled="true" title="{{ $pengaturan->pesanTutup() }}"
+                  class="flex gap-2 justify-center items-center px-5 py-3 w-full text-sm font-semibold rounded-xl border-2 cursor-not-allowed text-slate-400 bg-slate-100 border-slate-300">
+                  <i class="text-[16px] fa-solid fa-lock"></i>
+                  Vote sudah ditutup
+                </button>
+              @endif
             </div>
 
             <div class="hidden kandidat-visi">{{ $row->visi }}</div>
@@ -103,15 +115,22 @@
     const $popupModal   = $('#popupModal');
     const $modalVoteBtn = $('#modalVoteBtn');
     let voting = false; // cegah klik ganda
+    const VOTING_BUKA = @json($votingBuka);
+    const PESAN_TUTUP = @json($pengaturan->pesanTutup());
 
     // ================== POPUP VISI & MISI ==================
     function openKandidatModal($card) {
       $('#modalTitle').text($card.data('nama'));
-      $('#modalImg').attr('src', $card.data('image')).attr('alt', 'Kandidat ' + $card.data('nama'));
+      $('#modalImg').attr('src', $card.data('image')).attr('alt', 'Kandidat ' + $card.data('nama')).attr('width', '100').attr('height', '100');
       $('#modalVisi').text($.trim($card.find('.kandidat-visi').text()) || '-').css('white-space', 'pre-line');
       $('#modalMisi').text($.trim($card.find('.kandidat-misi').text()) || '-').css('white-space', 'pre-line');
       $modalVoteBtn.data('id', $card.data('id')).data('nama', $card.data('nama'));
-
+      if (!VOTING_BUKA) {
+        $modalVoteBtn.prop('disabled', true)
+          .html('<i class="text-[16px] fa-solid fa-lock"></i> Vote sudah ditutup')
+          .removeClass('text-blue-600 bg-white border-blue-600 hover:bg-blue-600 hover:text-white')
+          .addClass('text-slate-400 bg-slate-100 border-slate-300 cursor-not-allowed');
+      }
       $popupModal.removeClass('hidden').addClass('flex');
       $('body').addClass('overflow-hidden');
     }
@@ -165,6 +184,10 @@
 
     function selectKandidat(idKandidat, nama) {
       if (voting) return;
+      if (!VOTING_BUKA) {
+        EVoteDialog.error({ title: 'Voting ditutup', text: PESAN_TUTUP });
+        return;
+      }
       if (!idKandidat || !nama) {
         EVoteDialog.error({ text: 'Data kandidat tidak ditemukan. Silakan muat ulang halaman.' });
         return;

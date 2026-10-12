@@ -24,8 +24,8 @@ return new class extends Migration
       DB::table('tb_admin')->insert([
         'admin'      => 'Febri Pratama',
         'kelas'      => '12 RPL 1',
-        'username'   => 'admin',
-        'password'   => 'piketos2026',
+        'username'   => 'FEBRI PRATAMA',
+        'password'   => 'PILKETOS2026',
         'created_at' => now(),
         'updated_at' => now(),
       ]);

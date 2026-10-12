@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Kandidat extends Model
 {
@@ -17,8 +18,20 @@ class Kandidat extends Model
     
     public function getImageUrlAttribute(): string
     {
-        return $this->image
-            ? asset('upload/photo/' . $this->image)
-            : 'https://placehold.co/600x400/EEF3FF/1E3A8A?text=No-Image';
+        if ($this->image) {
+            // aman untuk dua format lama di database: "abc.jpg" dan "kandidat/abc.jpg"
+            $nama = basename($this->image);
+            $disk = Storage::disk('public');
+
+            if ($disk->exists('kandidat/' . $nama)) {
+                return asset('storage/kandidat/' . $nama) . '?v=' . $disk->lastModified('kandidat/' . $nama);
+            }
+            // foto lama yang belum dipindah (hanya dibaca; hapus blok ini setelah semua dipindah)
+            if (file_exists(public_path('upload/photo/' . $nama))) {
+                return asset('upload/photo/' . $nama);
+            }
+        }
+
+        return 'https://placehold.co/600x400/EEF3FF/1E3A8A?text=No-Image';
     }
 }

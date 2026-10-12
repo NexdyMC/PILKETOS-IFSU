@@ -11,8 +11,8 @@ class Siswa extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false; // tambahkan ini — tabel tidak punya created_at/updated_at
-    protected $fillable = ['token', 'token', 'nama', 'kelas', 'status', 'voted'];
-
+    protected $fillable = ['token', 'nama', 'kelas', 'status', 'voted'];
+    
     public static function static_hasil()
     {
         $totalSiswa = self::count();

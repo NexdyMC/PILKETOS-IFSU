@@ -17,6 +17,7 @@ new class extends Component
      data-url-template="{{ route('admin.siswa.template') }}"
      data-url-update="{{ route('admin.siswa.update') }}"
      data-url-destroy="{{ route('admin.siswa.destroy') }}"
+     data-url-settings="{{ url('/api/admin/settings') }}"
      data-csrf="{{ csrf_token() }}">
 
     <div class="mb-6">
@@ -24,34 +25,65 @@ new class extends Component
         <p class="mt-1 text-sm text-slate-500">Pantau perolehan suara sementara dan tingkat partisipasi pemilih secara real-time.</p>
     </div>
 
+    {{-- kartu ringkasan siswa --}}
+    <div wire:ignore class="flex flex-wrap gap-4 justify-between items-center p-6 bg-white rounded-2xl border shadow-sm">
+        <div class="flex gap-4 items-start">
+            <div class="flex justify-center items-center w-12 h-12 text-xl rounded-2xl shrink-0 bg-primary-50 text-primary-700">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold font-display text-navy-900">Data Siswa</h2>
+                <p class="mt-1 text-sm text-slate-500">Kelola daftar pemilih, token login, dan status voting setiap siswa.</p>
+            </div>
+        </div>
+        <div class="flex gap-3 items-center">
+            <div class="px-4 py-2 text-center rounded-xl bg-slate-50">
+                <p id="statSiswaTotal" class="text-xl font-bold text-navy-900">-</p>
+                <p class="text-xs text-slate-500">Siswa</p>
+            </div>
+            <div class="px-4 py-2 text-center rounded-xl bg-slate-50">
+                <p id="statSiswaKelas" class="text-xl font-bold text-navy-900">-</p>
+                <p class="text-xs text-slate-500">Kelas</p>
+            </div>
+        </div>
+    </div>
+
     <div class="grid gap-8 lg:grid-cols-3">
 
-        <div class="p-6 overflow-x-auto bg-white border shadow-sm lg:col-span-3 rounded-2xl">
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div class="overflow-x-auto p-6 bg-white rounded-2xl border shadow-sm lg:col-span-3">
+            <div class="flex flex-wrap gap-3 justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold font-display">Data Pemilih (Siswa)</h3>
 
-                <div wire:ignore class="flex flex-wrap items-center gap-2">
+                <div wire:ignore class="flex flex-wrap gap-2 items-center">
                     <button type="button" id="btnImportSiswa"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition border rounded-xl border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200 transition hover:bg-emerald-100">
                         <i class="fa-solid fa-file-excel"></i> Import Excel
                     </button>
                     <button type="button" id="btnTambahSiswa"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition border border-transparent rounded-xl bg-primary-700 hover:bg-primary-600">
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-semibold text-white rounded-xl border border-transparent transition bg-primary-700 hover:bg-primary-600">
                         <i class="fa-solid fa-user-plus"></i> Tambah Siswa
                     </button>
                     <button type="button" id="btnModeSelect"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition border rounded-xl border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100">
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-semibold text-violet-700 bg-violet-50 rounded-xl border border-violet-200 transition hover:bg-violet-100">
                         <i class="fa-regular fa-square-check"></i> <span>Mode Select</span>
                     </button>
                     <button type="button" id="btnResetVoting"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 transition border border-red-200 rounded-xl bg-red-50 hover:bg-red-100">
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200 transition hover:bg-red-100">
                         <i class="fa-solid fa-rotate-left"></i> Reset Voting
                     </button>
                 </div>
             </div>
 
             {{-- pencarian + filter --}}
-            <div wire:ignore class="grid gap-3 mb-3 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr_auto]">
+            <div id="gridFilterSiswa" wire:ignore class="grid gap-3 mb-3 sm:grid-cols-2 lg:grid-cols-[auto_1.6fr_1fr_1fr_1.2fr_auto]">
+                <select id="fSiswaPerPage" aria-label="Jumlah baris per halaman" title="Jumlah baris yang ditampilkan"
+                        class="w-full px-3 py-2.5 text-sm bg-white border outline-none rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                    <option value="30">30 baris</option>
+                    <option value="40">40 baris</option>
+                    <option value="50">50 baris</option>
+                    <option value="75">75 baris</option>
+                    <option value="0">Semua baris</option>
+                </select>
                 <div class="relative">
                     <i class="absolute text-sm -translate-y-1/2 fa-solid fa-magnifying-glass left-3.5 top-1/2 text-slate-400"></i>
                     <input id="fSiswaCari" type="search" autocomplete="off" placeholder="Cari nama, kelas, atau token..."
@@ -76,19 +108,19 @@ new class extends Component
             <p id="infoSiswa" wire:ignore class="mb-3 text-xs text-slate-500"></p>
 
             {{-- bar aksi Mode Select --}}
-            <div id="barSelect" wire:ignore class="items-center justify-between hidden gap-3 px-4 py-3 mb-4 border rounded-2xl border-violet-200 bg-violet-50">
-                <div class="flex items-center gap-2 text-sm text-violet-800">
+            <div id="barSelect" wire:ignore class="hidden gap-3 justify-between items-center px-4 py-3 mb-4 bg-violet-50 rounded-2xl border border-violet-200">
+                <div class="flex gap-2 items-center text-sm text-violet-800">
                     <i class="fa-regular fa-square-check"></i>
                     <span><b id="jumlahTerpilih">0</b> siswa dipilih</span>
-                    <span class="hidden text-xs text-violet-600 sm:inline">&middot; centang siswa, lalu pilih Edit atau Hapus</span>
+                    <span class="hidden text-xs text-violet-600 sm:inline">&middot; "pilih semua" hanya untuk baris di halaman ini</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex gap-2 items-center">
                     <button type="button" id="btnEditTerpilih" disabled
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed">
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-semibold text-white bg-amber-500 rounded-xl transition hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed">
                         <i class="fa-solid fa-pen-to-square"></i> Edit
                     </button>
                     <button type="button" id="btnHapusTerpilih" disabled
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition bg-red-600 rounded-xl hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed">
+                            class="inline-flex gap-2 items-center px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl transition hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed">
                         <i class="fa-solid fa-trash-can"></i> Hapus
                     </button>
                 </div>
@@ -97,7 +129,7 @@ new class extends Component
             <table class="w-full text-sm text-left">
                 <thead wire:ignore class="bg-slate-100 text-slate-600">
                     <tr>
-                        <th id="thPilih" class="hidden w-10 p-3 rounded-l-lg">
+                        <th id="thPilih" class="hidden p-3 w-10 rounded-l-lg">
                             <input type="checkbox" id="pilihSemua" class="w-4 h-4 cursor-pointer accent-violet-600" title="Pilih semua yang tampil">
                         </th>
                         <th id="thToken" class="p-3 rounded-l-lg">Token</th>
@@ -107,10 +139,10 @@ new class extends Component
                         <th class="p-3" aria-sort="none">
                             <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="kelas">Kelas <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
                         </th>
-                        <th class="p-3" aria-sort="none">
+                        <th id="thStatus" class="p-3" aria-sort="none">
                             <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="status">Status <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
                         </th>
-                        <th class="p-3 rounded-r-lg" aria-sort="none">
+                        <th id="thPilihan" class="p-3 rounded-r-lg" aria-sort="none">
                             <button type="button" class="inline-flex items-center gap-1.5 font-semibold transition-colors btn-sort hover:text-navy-900" data-sort="pilihan">Pilihan <i class="text-xs fa-solid fa-sort text-slate-400"></i></button>
                         </th>
                     </tr>
@@ -119,6 +151,9 @@ new class extends Component
 
                 </tbody>
             </table>
+
+            {{-- kontrol halaman --}}
+            <div id="paginasiSiswa" wire:ignore class="flex flex-wrap gap-3 justify-between items-center mt-4"></div>
         </div>
     </div>
 
@@ -187,6 +222,7 @@ new class extends Component
         template: $root.attr('data-url-template'),
         update:   $root.attr('data-url-update'),
         destroy:  $root.attr('data-url-destroy'),
+        settings: $root.attr('data-url-settings'),
         csrf:  $root.attr('data-csrf'),
     };
     const TOKEN_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -203,7 +239,19 @@ new class extends Component
     const terpilih = new Set();                 // token siswa yang dicentang
     const filter = { q: '', kelas: '', status: '', pilihan: '' };
     let timerCari = null;
+
+    // pagination: perPage 0 = tampilkan semua
+    const PER_PAGE_OPSI = [30, 40, 50, 75, 0];
+    const PER_PAGE_KEY  = 'evote.siswa.perPage';
+    let perPage = 30;
+    let halaman = 1;
+    try {
+        const simpan = parseInt(localStorage.getItem(PER_PAGE_KEY), 10);
+        if (PER_PAGE_OPSI.indexOf(simpan) !== -1) perPage = simpan;
+    } catch (e) { /* localStorage tidak tersedia */ }
+    $('#fSiswaPerPage').val(String(perPage));
     let kunciFilter = '';                       // penanda isi dropdown filter (agar tidak dibangun ulang sia-sia)
+    let viewVoted = false;                      // setting view_voted: boleh melihat siapa memilih siapa?
 
     /* ---------- popup modern ---------- */
     const baseModal = {
@@ -234,7 +282,7 @@ new class extends Component
 
     const header = (iconCls, tone, title, desc) => `
         <div class="px-6 pt-6 pb-4">
-            <div class="flex items-start gap-4">
+            <div class="flex gap-4 items-start">
                 <div class="flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 ${tone}">
                     <i class="text-lg ${iconCls}"></i>
                 </div>
@@ -325,7 +373,7 @@ new class extends Component
                  + '<i class="fa-solid fa-check-to-slot"></i>' + esc(peta.get(id)) + '</span>';
         }
         // voted terisi tapi id tidak ada di tb_kandidat (mis. kandidat sudah dihapus)
-        return '<span class="px-2 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700">Kandidat tidak ditemukan</span>';
+        return '<span class="px-2 py-1 text-xs font-semibold text-amber-700 bg-amber-50 rounded-lg">Kandidat tidak ditemukan</span>';
     }
 
     // Nama kandidat pilihan siswa (null = belum memilih); dipakai untuk pengurutan
@@ -435,11 +483,69 @@ new class extends Component
     /* ---------- mode select ---------- */
     const BTN_MODE = 'inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition border rounded-xl';
 
+    // hitung baris yang tampil di halaman aktif (setelah filter dan urutan)
+    function hitungHalaman() {
+        const semua = urutkan(terfilter());
+        const total = semua.length;
+        const per   = perPage === 0 ? Math.max(total, 1) : perPage;
+        const jumlahHalaman = Math.max(1, Math.ceil(total / per));
+
+        if (halaman > jumlahHalaman) halaman = jumlahHalaman;
+        if (halaman < 1) halaman = 1;
+
+        const awal   = perPage === 0 ? 0 : (halaman - 1) * per;
+        const tampil = perPage === 0 ? semua : semua.slice(awal, awal + per);
+        return { total: total, jumlahHalaman: jumlahHalaman, awal: awal, tampil: tampil };
+    }
+
+    // nomor halaman ringkas: 1 ... 4 5 [6] 7 8 ... 20
+    function daftarHalaman(sekarang, jumlah) {
+        const set = { 1: true };
+        set[jumlah] = true;
+        for (let i = sekarang - 2; i <= sekarang + 2; i++) { if (i >= 1 && i <= jumlah) set[i] = true; }
+        const nomor = Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
+
+        const hasil = [];
+        nomor.forEach(function (n, i) {
+            if (i > 0 && n - nomor[i - 1] > 1) hasil.push(null);   // titik-titik
+            hasil.push(n);
+        });
+        return hasil;
+    }
+
+    function renderPaginasi(info) {
+        const $box = $('#paginasiSiswa');
+        if (!$box.length) return;
+
+        if (perPage === 0 || info.jumlahHalaman <= 1) {
+            $box.empty();
+            return;
+        }
+
+        const BTN = 'px-3 py-1.5 text-sm font-semibold transition border rounded-lg pg-siswa ';
+        const OFF = 'border-slate-200 text-slate-600 hover:bg-slate-50';
+        const ON  = 'border-primary-700 bg-primary-700 text-white';
+        const DIS = 'opacity-40 cursor-not-allowed';
+
+        let html = '<p class="text-xs text-slate-500">Halaman <b>' + halaman + '</b> dari <b>' + info.jumlahHalaman + '</b></p>'
+                 + '<div class="flex flex-wrap items-center gap-1.5">';
+
+        html += '<button type="button" class="' + BTN + OFF + (halaman === 1 ? ' ' + DIS : '') + '" data-hal="' + (halaman - 1) + '"' + (halaman === 1 ? ' disabled' : '') + '>Sebelumnya</button>';
+        daftarHalaman(halaman, info.jumlahHalaman).forEach(function (n) {
+            if (n === null) { html += '<span class="px-1 text-slate-400">...</span>'; return; }
+            html += '<button type="button" class="' + BTN + (n === halaman ? ON : OFF) + '" data-hal="' + n + '"' + (n === halaman ? ' aria-current="page"' : '') + '>' + n + '</button>';
+        });
+        html += '<button type="button" class="' + BTN + OFF + (halaman === info.jumlahHalaman ? ' ' + DIS : '') + '" data-hal="' + (halaman + 1) + '"' + (halaman === info.jumlahHalaman ? ' disabled' : '') + '>Berikutnya</button>';
+        html += '</div>';
+
+        $box.html(html);
+    }
+
     function perbaruiSelect(tampil) {
         $('#jumlahTerpilih').text(terpilih.size);
         $('#btnEditTerpilih, #btnHapusTerpilih').prop('disabled', terpilih.size === 0);
 
-        const tokenTampil = (tampil || urutkan(terfilter())).map(function (s) { return String(s.token); });
+        const tokenTampil = (tampil || hitungHalaman().tampil).map(function (s) { return String(s.token); });
         const jumlah = tokenTampil.filter(function (t) { return terpilih.has(t); }).length;
         const $semua = $('#pilihSemua');
         if ($semua.length) {
@@ -464,7 +570,8 @@ new class extends Component
     function renderTabel() {
         if (!aktif()) return;
 
-        const tampil = urutkan(terfilter());
+        const info   = hitungHalaman();
+        const tampil = info.tampil;
 
         let rows = '';
         $.each(tampil, function (i, s) {
@@ -474,28 +581,59 @@ new class extends Component
                 ? '<span class="px-2 py-1 text-xs font-bold text-green-700 bg-green-100 rounded">Sudah</span>'
                 : '<span class="px-2 py-1 text-xs font-bold text-red-700 bg-red-100 rounded">Belum</span>';
             const kolomPilih = modeSelect
-                ? '<td class="w-10 p-3"><input type="checkbox" class="w-4 h-4 cursor-pointer chk-siswa accent-violet-600" data-token="' + esc(token) + '"' + (dipilih ? ' checked' : '') + '></td>'
+                ? '<td class="p-3 w-10"><input type="checkbox" class="w-4 h-4 cursor-pointer chk-siswa accent-violet-600" data-token="' + esc(token) + '"' + (dipilih ? ' checked' : '') + '></td>'
                 : '';
 
             rows += `<tr class="baris-siswa ${dipilih ? 'bg-violet-50' : 'hover:bg-slate-50'} ${modeSelect ? 'cursor-pointer' : ''}" data-token="${esc(token)}">
                 ${kolomPilih}
                 <td class="p-3">
-                    <button type="button" class="inline-flex items-center gap-2 font-mono font-medium text-blue-600 transition-colors btn-copy-token hover:text-blue-800" data-token="${esc(token)}"> ${esc(token)}<i class="text-xs fa-regular fa-copy text-slate-400"></i></button>
+                    <button type="button" class="inline-flex gap-2 items-center font-mono font-medium text-blue-600 transition-colors btn-copy-token hover:text-blue-800" data-token="${esc(token)}"> ${esc(token)}<i class="text-xs fa-regular fa-copy text-slate-400"></i></button>
                 </td>
                 <td class="p-3 font-medium text-navy-900">${esc(s.nama)}</td>
                 <td class="p-3 font-medium text-navy-900">${esc(s.kelas)}</td>
                 <td class="p-3">${status}</td>
-                <td class="p-3">${pilihanBadge(s, kandidatPeta)}</td>
+                ${viewVoted ? '<td class="p-3">' + pilihanBadge(s, kandidatPeta) + '</td>' : ''}
             </tr>`;
         });
         if (!rows) {
-            rows = '<tr><td colspan="6" class="p-8 text-center text-slate-400">Tidak ada siswa yang cocok dengan filter.</td></tr>';
+            rows = '<tr><td colspan="' + (4 + (viewVoted ? 1 : 0) + (modeSelect ? 1 : 0)) + '" class="p-8 text-center text-slate-400">Tidak ada siswa yang cocok dengan filter.</td></tr>';
         }
         $('#tabel-siswa').html(rows);
 
-        $('#infoSiswa').text('Menampilkan ' + tampil.length + ' dari ' + siswaList.length + ' siswa');
+        let teks;
+        if (info.total === 0) {
+            teks = 'Menampilkan 0 dari ' + siswaList.length + ' siswa';
+        } else {
+            teks = 'Menampilkan ' + (info.awal + 1) + '-' + (info.awal + tampil.length) + ' dari ' + info.total + ' siswa';
+            if (info.total !== siswaList.length) teks += ' (hasil filter, total ' + siswaList.length + ' siswa)';
+            if (perPage === 0 && info.total > 100) teks += ' · menampilkan semua baris bisa membuat halaman terasa lambat';
+        }
+        $('#infoSiswa').text(teks);
+        renderPaginasi(info);
         perbaruiIkonUrut();
         perbaruiSelect(tampil);
+    }
+
+    // ringkasan di kartu atas: total siswa dan jumlah kelas
+    function perbaruiStatistik() {
+        const kelas = new Set(siswaList.map(function (s) { return s.kelas; }));
+        $('#statSiswaTotal').text(siswaList.length);
+        $('#statSiswaKelas').text(kelas.size);
+    }
+
+    // view_voted nonaktif: sembunyikan semua informasi "siapa memilih siapa"
+    function terapkanViewVoted() {
+        $('#thPilihan, #fSiswaPilihan').toggleClass('hidden', !viewVoted);
+        $('#thStatus').toggleClass('rounded-r-lg', !viewVoted);
+        $('#gridFilterSiswa')
+            .toggleClass('lg:grid-cols-[auto_1.6fr_1fr_1fr_1.2fr_auto]', viewVoted)
+            .toggleClass('lg:grid-cols-[auto_1.6fr_1fr_1fr_auto]', !viewVoted);
+
+        if (!viewVoted) {
+            filter.pilihan = '';
+            $('#fSiswaPilihan').val('');
+            if (urut.kolom === 'pilihan') urut = { kolom: null, arah: 'asc' };
+        }
     }
 
     function loadSiswa() {
@@ -506,12 +644,14 @@ new class extends Component
             request(cfg.kandidat, 'GET').catch(function (xhr) {
                 console.error('Gagal ambil data kandidat:', xhr);
                 return null;
-            })
+            }),
+            request(cfg.settings, 'GET').catch(function () { return null; })
         ]).then(function (hasil) {
             if (!aktif()) return;
 
             siswaList = hasil[0];
             kandidatData = hasil[1] ? hasil[1].data : null;
+            viewVoted = !!(hasil[2] && hasil[2].view_voted);   // gagal dimuat = disembunyikan
             kandidatPeta = kandidatData
                 ? new Map(kandidatData.map(function (k) { return [String(k.id), k.nama]; }))
                 : null;
@@ -520,6 +660,8 @@ new class extends Component
             const ada = new Set(siswaList.map(function (s) { return String(s.token); }));
             terpilih.forEach(function (t) { if (!ada.has(t)) terpilih.delete(t); });
 
+            perbaruiStatistik();
+            terapkanViewVoted();
             isiFilter();
             renderTabel();   // urutan, filter, dan centang tetap dipakai saat auto-refresh
         }).catch(function (xhr) {
@@ -586,7 +728,7 @@ new class extends Component
                 html: header('fa-solid fa-check', 'bg-emerald-50 text-emerald-600', 'Siswa ditambahkan',
                              'Catat atau salin token ini untuk <b>' + esc(nama) + '</b>.') + `
                     <div class="px-6 pb-1">
-                        <div class="p-5 text-center border rounded-2xl border-slate-200 bg-slate-50">
+                        <div class="p-5 text-center rounded-2xl border border-slate-200 bg-slate-50">
                             <p class="text-xs font-medium tracking-wide uppercase text-slate-500">Token login</p>
                             <p class="mt-2 font-mono text-4xl font-bold tracking-[0.3em] text-primary-700">${esc(res.token)}</p>
                             <button type="button" class="sw-copy inline-flex items-center gap-2 px-3 py-1.5 mt-3 text-xs font-semibold transition bg-white border rounded-lg text-slate-700 border-slate-200 hover:bg-slate-100" data-token="${esc(res.token)}">
@@ -606,13 +748,13 @@ new class extends Component
                          'Hanya kolom <b>nama</b> dan <b>kelas</b> yang dibaca. Token dibuat otomatis.') + `
                 <div class="px-6 pb-1 space-y-4">
                     <label id="swDrop" for="swFile"
-                           class="flex flex-col items-center justify-center gap-1 p-6 text-center transition border-2 border-dashed cursor-pointer rounded-2xl border-slate-300 bg-slate-50 hover:border-primary-400 hover:bg-primary-50/50">
+                           class="flex flex-col gap-1 justify-center items-center p-6 text-center rounded-2xl border-2 border-dashed transition cursor-pointer border-slate-300 bg-slate-50 hover:border-primary-400 hover:bg-primary-50/50">
                         <i class="mb-1 text-2xl fa-solid fa-cloud-arrow-up text-slate-400"></i>
                         <span id="swFileNama" class="text-sm font-semibold break-all text-slate-800">Klik atau tarik file ke sini</span>
                         <span class="text-xs text-slate-500">.xlsx, .xls, atau .csv (maks 2MB)</span>
                         <input id="swFile" type="file" accept=".xlsx,.xls,.csv" class="hidden">
                     </label>
-                    <div class="p-3 text-xs leading-relaxed border rounded-xl border-slate-200 bg-slate-50 text-slate-600">
+                    <div class="p-3 text-xs leading-relaxed rounded-xl border border-slate-200 bg-slate-50 text-slate-600">
                         Baris pertama harus berisi judul kolom <b>nama</b> dan <b>kelas</b>. Siswa dengan nama dan kelas yang sama
                         dengan data yang sudah ada akan dilewati.
                         <a href="${esc(cfg.template)}" class="font-semibold text-primary-700 hover:underline">Unduh template</a>
@@ -657,7 +799,7 @@ new class extends Component
             const sisa = total - items.length;
             return `<div>
                 <p class="mb-1.5 text-xs font-semibold tracking-wide uppercase text-slate-500">${judul}</p>
-                <ul class="p-3 space-y-1 overflow-y-auto text-xs border max-h-36 rounded-xl border-slate-200 text-slate-600">
+                <ul class="overflow-y-auto p-3 space-y-1 max-h-36 text-xs rounded-xl border border-slate-200 text-slate-600">
                     ${items.map(fmt).join('')}
                     ${sisa > 0 ? '<li class="text-slate-400">... dan ' + sisa + ' lainnya</li>' : ''}
                 </ul></div>`;
@@ -768,7 +910,9 @@ new class extends Component
                   + '<td class="px-3 py-2 font-mono text-xs font-semibold whitespace-nowrap text-primary-700">' + esc(s.token) + '</td>'
                   + '<td class="px-2 py-2"><input type="text" maxlength="100" class="ed-nama ' + SEL_CELL + '" value="' + esc(s.nama) + '"></td>'
                   + '<td class="px-2 py-2"><input type="text" maxlength="50" class="ed-kelas ' + SEL_CELL + '" value="' + esc(s.kelas) + '"></td>'
-                  + '<td class="px-2 py-2"><select class="ed-status ' + SEL_CELL + '">' + opsiStatus(s) + '</select></td>'
+                  + '<td class="px-2 py-2">' + (viewVoted
+                        ? '<select class="ed-status ' + SEL_CELL + '">' + opsiStatus(s) + '</select>'
+                        : '<span class="text-xs font-semibold ' + (s.status == 1 ? 'text-emerald-700' : 'text-slate-500') + '">' + (s.status == 1 ? 'Sudah memilih' : 'Belum memilih') + '</span>') + '</td>'
                   + '</tr>';
         });
 
@@ -790,7 +934,7 @@ new class extends Component
                             <tbody>${rows}</tbody>
                         </table>
                     </div>
-                    <p class="mt-2 text-xs text-slate-500">Token tidak dapat diubah. Mengubah status ke "Belum memilih" menghapus suara siswa tersebut.</p>
+                    <p class="mt-2 text-xs text-slate-500">${viewVoted ? 'Token tidak dapat diubah. Mengubah status ke "Belum memilih" menghapus suara siswa tersebut.' : 'Token tidak dapat diubah. Status dan pilihan suara tidak ditampilkan karena fitur Lihat Pilihan Siswa sedang dimatikan.'}</p>
                 </div>`,
             showCancelButton: true,
             confirmButtonText: 'Edit',
@@ -807,14 +951,16 @@ new class extends Component
                     const asal  = asalMap[token];
                     const nama  = $(this).find('.ed-nama').val().trim();
                     const kelas = $(this).find('.ed-kelas').val().trim();
-                    const voted = $(this).find('.ed-status').val();
+                    const voted = viewVoted ? $(this).find('.ed-status').val() : null;
 
                     if (!nama || !kelas) {
                         galat = 'Nama dan kelas tidak boleh kosong (token ' + token + ').';
                         return false;
                     }
-                    if (nama !== String(asal.nama).trim() || kelas !== String(asal.kelas).trim() || voted !== suaraAsal(asal)) {
-                        perubahan.push({ token: token, nama: nama, kelas: kelas, voted: voted === '' ? null : voted });
+                    if (nama !== String(asal.nama).trim() || kelas !== String(asal.kelas).trim() || (viewVoted && voted !== suaraAsal(asal))) {
+                        const baris = { token: token, nama: nama, kelas: kelas };
+                        if (viewVoted) baris.voted = voted === '' ? null : voted;   // tanpa "voted" = suara tidak disentuh
+                        perubahan.push(baris);
                     }
                 });
 
@@ -844,7 +990,7 @@ new class extends Component
         const sudah  = data.filter(function (s) { return s.status == 1; }).length;
         const sisa   = data.length - 5;
         const contoh = data.slice(0, 5).map(function (s) {
-            return '<li class="flex justify-between gap-3"><span class="font-medium truncate text-slate-800">' + esc(s.nama)
+            return '<li class="flex gap-3 justify-between"><span class="font-medium truncate text-slate-800">' + esc(s.nama)
                  + '</span><span class="text-slate-400 shrink-0">' + esc(s.kelas) + '</span></li>';
         }).join('');
 
@@ -856,7 +1002,7 @@ new class extends Component
                         ${contoh}
                         ${sisa > 0 ? '<li class="text-xs text-slate-400">... dan ' + sisa + ' siswa lainnya</li>' : ''}
                     </ul>
-                    ${sudah > 0 ? '<div class="p-3 text-xs leading-relaxed border rounded-xl border-amber-200 bg-amber-50 text-amber-800"><b>' + sudah + '</b> di antaranya sudah memilih. Suara mereka ikut terhapus dari hasil pemilihan.</div>' : ''}
+                    ${sudah > 0 ? '<div class="p-3 text-xs leading-relaxed text-amber-800 bg-amber-50 rounded-xl border border-amber-200"><b>' + sudah + '</b> di antaranya sudah memilih. Suara mereka ikut terhapus dari hasil pemilihan.</div>' : ''}
                 </div>`,
             showCancelButton: true,
             confirmButtonText: 'Hapus',
@@ -882,20 +1028,38 @@ new class extends Component
         else if (urut.arah === 'asc')  urut = { kolom: kol, arah: 'desc' };
         else                           urut = { kolom: null, arah: 'asc' };
 
+        halaman = 1;
         renderTabel();
+    });
+
+    // ---- jumlah baris & pindah halaman ----
+    $(document).on('change' + NS, '#fSiswaPerPage', function () {
+        const nilai = parseInt(this.value, 10);
+        perPage = PER_PAGE_OPSI.indexOf(nilai) !== -1 ? nilai : 30;
+        halaman = 1;
+        try { localStorage.setItem(PER_PAGE_KEY, String(perPage)); } catch (e) { /* abaikan */ }
+        renderTabel();
+    });
+    $(document).on('click' + NS, '.pg-siswa', function () {
+        const tujuan = parseInt($(this).attr('data-hal'), 10);
+        if (!tujuan || $(this).prop('disabled')) return;
+        halaman = tujuan;
+        renderTabel();
+        const el = document.getElementById('siswa-app');
+        if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     // ---- filter ----
     $(document).on('input' + NS, '#fSiswaCari', function () {
         const nilai = this.value;
         clearTimeout(timerCari);
-        timerCari = setTimeout(function () { filter.q = nilai; renderTabel(); }, 200);
+        timerCari = setTimeout(function () { filter.q = nilai; halaman = 1; renderTabel(); }, 200);
     });
-    $(document).on('change' + NS, '#fSiswaKelas',   function () { filter.kelas   = this.value; renderTabel(); });
-    $(document).on('change' + NS, '#fSiswaStatus',  function () { filter.status  = this.value; renderTabel(); });
-    $(document).on('change' + NS, '#fSiswaPilihan', function () { filter.pilihan = this.value; renderTabel(); });
+    $(document).on('change' + NS, '#fSiswaKelas',   function () { filter.kelas   = this.value; halaman = 1; renderTabel(); });
+    $(document).on('change' + NS, '#fSiswaStatus',  function () { filter.status  = this.value; halaman = 1; renderTabel(); });
+    $(document).on('change' + NS, '#fSiswaPilihan', function () { filter.pilihan = this.value; halaman = 1; renderTabel(); });
     $(document).on('click' + NS, '#fSiswaReset', function () {
-        filter.q = ''; filter.kelas = ''; filter.status = ''; filter.pilihan = '';
+        filter.q = ''; filter.kelas = ''; filter.status = ''; filter.pilihan = ''; halaman = 1;
         $('#fSiswaCari').val('');
         $('#fSiswaKelas, #fSiswaStatus, #fSiswaPilihan').val('');
         renderTabel();
@@ -915,7 +1079,7 @@ new class extends Component
     });
     $(document).on('change' + NS, '#pilihSemua', function () {
         const centang = this.checked;
-        urutkan(terfilter()).forEach(function (s) {
+        hitungHalaman().tampil.forEach(function (s) {   // hanya baris di halaman yang tampil
             const t = String(s.token);
             if (centang) terpilih.add(t); else terpilih.delete(t);
         });
