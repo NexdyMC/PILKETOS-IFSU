@@ -43,7 +43,9 @@ class LoginController extends Controller
                 'message' => 'Password salah'
             ], 401);
         }
-
+        
+        $request->session()->regenerate();
+        
         session([
             'id_admin' => $admin->id_admin,
             'username' => $admin->username,
@@ -84,6 +86,6 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         // 4. Redirect ke halaman login atau beranda
-        return redirect('/admin/login')->with('success', 'Anda telah berhasil keluar.');
+        return redirect('/admin')->with('success', 'Anda telah berhasil keluar.');
     }
 }

@@ -9,14 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tb_settings', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_sekolah', 40);
-            $table->string('judul_pemilihan', 30);
+            $table->id('id_settings');
+            $table->string('nama_sekolah', 100);
+            $table->string('judul_pemilihan', 100);
             $table->string('tahun_ajaran', 20);
-            $table->enum('status_voting', ['0', '1'])->default('0');
-            $table->dateTime('waktu_mulai');
-            $table->dateTime('waktu_selesai');
-            $table->string('logo_sekolah', 40)->nullable();
+            $table->tinyInteger('status_voting')->default(0);
+            $table->tinyInteger('view_voted')->default(0);
+            $table->dateTime('waktu_mulai')->nullable();
+            $table->dateTime('waktu_selesai')->nullable();
+            $table->string('logo_sekolah', 100)->nullable();
             $table->timestamps();
         });
     }

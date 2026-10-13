@@ -18,9 +18,9 @@ new class extends Component
      data-csrf="{{ csrf_token() }}">
 
     {{-- 1. Header export --}}
-    <div class="flex flex-wrap items-center justify-between gap-4 p-6 bg-white border shadow-sm rounded-2xl">
-        <div class="flex items-start gap-4">
-            <div class="flex items-center justify-center w-12 h-12 text-xl rounded-2xl shrink-0 bg-primary-50 text-primary-700">
+    <div class="flex flex-wrap gap-4 justify-between items-center p-6 bg-white rounded-2xl border shadow-sm">
+        <div class="flex gap-4 items-start">
+            <div class="flex justify-center items-center w-12 h-12 text-xl rounded-2xl shrink-0 bg-primary-50 text-primary-700">
                 <i class="fa-solid fa-file-export"></i>
             </div>
             <div>
@@ -28,7 +28,7 @@ new class extends Component
                 <p class="mt-1 text-sm text-slate-500">Unduh daftar token pemilih dalam bentuk PDF atau Excel, per kelas maupun seluruh sekolah.</p>
             </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex gap-3 items-center">
             <div class="px-4 py-2 text-center rounded-xl bg-slate-50">
                 <p id="statTotal" class="text-xl font-bold text-navy-900">-</p>
                 <p class="text-xs text-slate-500">Siswa</p>
@@ -41,8 +41,8 @@ new class extends Component
     </div>
 
     {{-- 2. Sorter / filter --}}
-    <div class="p-4 bg-white border shadow-sm rounded-2xl">
-        <div class="grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.4fr_auto]">
+    <div class="p-4 bg-white rounded-2xl border shadow-sm">
+        <div class="grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto_1.4fr_auto]">
             <div>
                 <label for="fKelas" class="block mb-1.5 text-xs font-semibold tracking-wide uppercase text-slate-500">Kelas</label>
                 <select id="fKelas" wire:ignore class="w-full px-3 py-2.5 text-sm bg-white border outline-none rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
@@ -55,6 +55,16 @@ new class extends Component
                     <option value="kelas">Kelas, lalu nama</option>
                     <option value="nama_asc">Nama A &rarr; Z</option>
                     <option value="nama_desc">Nama Z &rarr; A</option>
+                </select>
+            </div>
+            <div>
+                <label for="fPerPage" class="block mb-1.5 text-xs font-semibold tracking-wide uppercase text-slate-500">Tampilkan</label>
+                <select id="fPerPage" title="Jumlah baris pratinjau (tidak memengaruhi isi file unduhan)" class="w-full px-3 py-2.5 text-sm bg-white border outline-none rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                    <option value="30">30 baris</option>
+                    <option value="40">40 baris</option>
+                    <option value="50">50 baris</option>
+                    <option value="75">75 baris</option>
+                    <option value="0">Semua baris</option>
                 </select>
             </div>
             <div>
@@ -71,43 +81,23 @@ new class extends Component
         </div>
     </div>
 
-    {{-- 3. Tabel pratinjau --}}
-    <div class="p-6 overflow-x-auto bg-white border shadow-sm rounded-2xl">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <h3 class="text-lg font-semibold font-display">Pratinjau Data</h3>
-            <span id="infoTabel" class="px-3 py-1 text-xs font-semibold rounded-full bg-primary-50 text-primary-700">Memuat data...</span>
-        </div>
-
-        <table class="w-full text-sm text-left">
-            <thead wire:ignore class="bg-slate-100 text-slate-600">
-                <tr>
-                    <th class="w-16 p-3 rounded-l-lg">No</th>
-                    <th class="p-3">Nama</th>
-                    <th class="p-3 rounded-r-lg">Kelas</th>
-                    <th class="p-3">Token</th>
-                </tr>
-            </thead>
-            <tbody id="tabelExport" wire:ignore class="divide-y divide-slate-100"></tbody>
-        </table>
-    </div>
-
     {{-- 4. Opsi dokumen & unduh --}}
-    <div class="p-6 bg-white border shadow-sm rounded-2xl">
+    <div class="p-6 bg-white rounded-2xl border shadow-sm">
         <h3 class="text-lg font-semibold font-display">Unduh Dokumen</h3>
         <p class="mt-1 text-sm text-slate-500">Pilih bentuk PDF, lalu unduh sesuai kebutuhan. PDF dan Excel mengikuti filter di atas.</p>
 
         <div class="grid gap-4 mt-5 sm:grid-cols-2">
             <label class="block cursor-pointer">
                 <input type="radio" name="layoutPdf" value="daftar" class="sr-only peer" checked>
-                <div class="h-full p-4 transition border-2 rounded-2xl border-slate-200 hover:border-slate-300 peer-checked:border-primary-600 peer-checked:bg-primary-50/60">
-                    <p class="flex items-center gap-2 font-semibold text-navy-900"><i class="fa-solid fa-list-ol text-primary-700"></i> Daftar token</p>
+                <div class="p-4 h-full rounded-2xl border-2 transition border-slate-200 hover:border-slate-300 peer-checked:border-primary-600 peer-checked:bg-primary-50/60">
+                    <p class="flex gap-2 items-center font-semibold text-navy-900"><i class="fa-solid fa-list-ol text-primary-700"></i> Daftar token</p>
                     <p class="mt-1 text-xs leading-relaxed text-slate-500">Tabel nama dan token, satu halaman per kelas. Cocok untuk guru atau wali kelas.</p>
                 </div>
             </label>
             <label class="block cursor-pointer">
                 <input type="radio" name="layoutPdf" value="kartu" class="sr-only peer">
-                <div class="h-full p-4 transition border-2 rounded-2xl border-slate-200 hover:border-slate-300 peer-checked:border-primary-600 peer-checked:bg-primary-50/60">
-                    <p class="flex items-center gap-2 font-semibold text-navy-900"><i class="fa-regular fa-id-card text-primary-700"></i> Kartu token</p>
+                <div class="p-4 h-full rounded-2xl border-2 transition border-slate-200 hover:border-slate-300 peer-checked:border-primary-600 peer-checked:bg-primary-50/60">
+                    <p class="flex gap-2 items-center font-semibold text-navy-900"><i class="fa-regular fa-id-card text-primary-700"></i> Kartu token</p>
                     <p class="mt-1 text-xs leading-relaxed text-slate-500">Satu kartu per siswa, tinggal digunting lalu dibagikan ke murid.</p>
                 </div>
             </label>
@@ -115,15 +105,15 @@ new class extends Component
 
         <div class="grid gap-3 mt-5 sm:grid-cols-3">
             <button type="button" data-aksi="pdf"
-                    class="btn-export flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white transition rounded-xl bg-primary-700 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="flex gap-2 justify-center items-center px-4 py-3 text-sm font-semibold text-white rounded-xl btn-export transition bg-primary-700 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-file-pdf"></i> Unduh PDF
             </button>
             <button type="button" data-aksi="excel"
-                    class="btn-export flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white transition rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="flex gap-2 justify-center items-center px-4 py-3 text-sm font-semibold text-white bg-emerald-600 rounded-xl btn-export transition hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-file-excel"></i> Unduh Excel
             </button>
             <button type="button" data-aksi="zip"
-                    class="btn-export flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold transition bg-white border rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="flex gap-2 justify-center items-center px-4 py-3 text-sm font-semibold bg-white rounded-xl border btn-export transition border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-file-zipper"></i> PDF per kelas (ZIP)
             </button>
         </div>
@@ -135,10 +125,32 @@ new class extends Component
         </ul>
     </div>
 
+    {{-- 3. Tabel pratinjau --}}
+    <div class="overflow-x-auto p-6 bg-white rounded-2xl border shadow-sm">
+        <div class="flex flex-wrap gap-2 justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold font-display">Pratinjau Data</h3>
+            <span id="infoTabel" class="px-3 py-1 text-xs font-semibold rounded-full bg-primary-50 text-primary-700">Memuat data...</span>
+        </div>
+
+        <table class="w-full text-sm text-left">
+            <thead wire:ignore class="bg-slate-100 text-slate-600">
+                <tr>
+                    <th class="p-3 w-16 rounded-l-lg">No</th>
+                    <th class="p-3">Nama</th>
+                    <th class="p-3 rounded-r-lg">Kelas</th>
+                    <th class="p-3">Token</th>
+                </tr>
+            </thead>
+            <tbody id="tabelExport" wire:ignore class="divide-y divide-slate-100"></tbody>
+        </table>
+
+        <div id="paginasiExport" wire:ignore class="flex flex-wrap gap-3 justify-between items-center mt-4"></div>
+    </div>
+
     {{-- 5. Import data siswa --}}
-    <div class="flex flex-wrap items-center justify-between gap-4 p-6 bg-white border shadow-sm rounded-2xl">
-        <div class="flex items-start gap-4">
-            <div class="flex items-center justify-center w-12 h-12 text-xl rounded-2xl shrink-0 bg-emerald-50 text-emerald-600">
+    <div class="flex flex-wrap gap-4 justify-between items-center p-6 bg-white rounded-2xl border shadow-sm">
+        <div class="flex gap-4 items-start">
+            <div class="flex justify-center items-center w-12 h-12 text-xl text-emerald-600 bg-emerald-50 rounded-2xl shrink-0">
                 <i class="fa-solid fa-file-import"></i>
             </div>
             <div>
@@ -146,7 +158,7 @@ new class extends Component
                 <p class="mt-1 text-sm text-slate-500">Tambahkan banyak siswa sekaligus dari file Excel. Hanya kolom <b>nama</b> dan <b>kelas</b> yang dibaca, token dibuat otomatis.</p>
             </div>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap gap-3 items-center">
             <a href="{{ route('admin.siswa.template') }}" class="px-4 py-2.5 text-sm font-semibold transition border rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50">
                 <i class="mr-1.5 fa-solid fa-download"></i>Template
             </a>
@@ -180,6 +192,17 @@ new class extends Component
     let siswa = [];
     const filter = { kelas: '', q: '', urut: 'kelas' };
     let timerCari = null;
+
+    // pagination pratinjau: perPage 0 = tampilkan semua (file unduhan tetap memuat semua data sesuai filter)
+    const PER_PAGE_OPSI = [30, 40, 50, 75, 0];
+    const PER_PAGE_KEY  = 'evote.export.perPage';
+    let perPage = 30;
+    let halaman = 1;
+    try {
+        const simpan = parseInt(localStorage.getItem(PER_PAGE_KEY), 10);
+        if (PER_PAGE_OPSI.indexOf(simpan) !== -1) perPage = simpan;
+    } catch (e) { /* localStorage tidak tersedia */ }
+    $('#fPerPage').val(String(perPage));
 
     /* ---------- helpers ---------- */
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
@@ -235,14 +258,61 @@ new class extends Component
         $('.btn-export[data-aksi="zip"]').prop('disabled', siswa.length === 0);
     }
 
+    // nomor halaman ringkas: 1 ... 4 5 [6] 7 8 ... 20
+    function daftarHalaman(sekarang, jumlah) {
+        const set = { 1: true };
+        set[jumlah] = true;
+        for (let i = sekarang - 2; i <= sekarang + 2; i++) { if (i >= 1 && i <= jumlah) set[i] = true; }
+        const nomor = Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
+
+        const hasil = [];
+        nomor.forEach(function (n, i) {
+            if (i > 0 && n - nomor[i - 1] > 1) hasil.push(null);
+            hasil.push(n);
+        });
+        return hasil;
+    }
+
+    function renderPaginasi(jumlahHalaman) {
+        const $box = $('#paginasiExport');
+        if (!$box.length) return;
+
+        if (perPage === 0 || jumlahHalaman <= 1) { $box.empty(); return; }
+
+        const BTN = 'px-3 py-1.5 text-sm font-semibold transition border rounded-lg pg-export ';
+        const OFF = 'border-slate-200 text-slate-600 hover:bg-slate-50';
+        const ON  = 'border-primary-700 bg-primary-700 text-white';
+        const DIS = 'opacity-40 cursor-not-allowed';
+
+        let html = '<p class="text-xs text-slate-500">Halaman <b>' + halaman + '</b> dari <b>' + jumlahHalaman + '</b></p>'
+                 + '<div class="flex flex-wrap gap-1.5 items-center">';
+        html += '<button type="button" class="' + BTN + OFF + (halaman === 1 ? ' ' + DIS : '') + '" data-hal="' + (halaman - 1) + '"' + (halaman === 1 ? ' disabled' : '') + '>Sebelumnya</button>';
+        daftarHalaman(halaman, jumlahHalaman).forEach(function (n) {
+            if (n === null) { html += '<span class="px-1 text-slate-400">...</span>'; return; }
+            html += '<button type="button" class="' + BTN + (n === halaman ? ON : OFF) + '" data-hal="' + n + '"' + (n === halaman ? ' aria-current="page"' : '') + '>' + n + '</button>';
+        });
+        html += '<button type="button" class="' + BTN + OFF + (halaman === jumlahHalaman ? ' ' + DIS : '') + '" data-hal="' + (halaman + 1) + '"' + (halaman === jumlahHalaman ? ' disabled' : '') + '>Berikutnya</button>';
+        html += '</div>';
+        $box.html(html);
+    }
+
     function renderTabel() {
         if (!aktif()) return;
 
-        const data = terfilter();
+        const data  = terfilter();
+        const total = data.length;
+        const per   = perPage === 0 ? Math.max(total, 1) : perPage;
+        const jumlahHalaman = Math.max(1, Math.ceil(total / per));
+        if (halaman > jumlahHalaman) halaman = jumlahHalaman;
+        if (halaman < 1) halaman = 1;
+
+        const awal   = perPage === 0 ? 0 : (halaman - 1) * per;
+        const tampil = perPage === 0 ? data : data.slice(awal, awal + per);
+
         let rows = '';
-        data.forEach(function (s, i) {
+        tampil.forEach(function (s, i) {
             rows += '<tr class="hover:bg-slate-50">'
-                  + '<td class="p-3 text-slate-400">' + (i + 1) + '</td>'
+                  + '<td class="p-3 text-slate-400">' + (awal + i + 1) + '</td>'
                   + '<td class="p-3 font-medium text-navy-900">' + esc(s.nama) + '</td>'
                   + '<td class="p-3 font-medium text-navy-900">' + esc(s.kelas) + '</td>'
                   + '<td class="p-3 font-mono font-medium text-blue-600">' + esc(s.token) + '</td>'
@@ -254,8 +324,10 @@ new class extends Component
         $('#tabelExport').html(rows);
 
         const label = filter.kelas ? 'Kelas ' + filter.kelas + ': ' : '';
-        $('#infoTabel').text(label + data.length + ' dari ' + siswa.length + ' siswa');
-        perbaruiTombol(data.length);
+        const rentang = total === 0 ? '0' : (awal + 1) + '-' + (awal + tampil.length);
+        $('#infoTabel').text(label + 'Menampilkan ' + rentang + ' dari ' + total + ' siswa' + (total !== siswa.length ? ' (total ' + siswa.length + ')' : ''));
+        renderPaginasi(jumlahHalaman);
+        perbaruiTombol(total);   // tombol unduh mengikuti jumlah data terfilter, bukan jumlah baris yang tampil
     }
 
     function loadSiswa() {
@@ -351,7 +423,7 @@ new class extends Component
 
     const header = (iconCls, tone, title, desc) => `
         <div class="px-6 pt-6 pb-4">
-            <div class="flex items-start gap-4">
+            <div class="flex gap-4 items-start">
                 <div class="flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 ${tone}"><i class="text-lg ${iconCls}"></i></div>
                 <div class="min-w-0 pt-0.5">
                     <h3 class="text-lg font-semibold leading-tight text-slate-900">${title}</h3>
@@ -383,13 +455,13 @@ new class extends Component
                          'Hanya kolom <b>nama</b> dan <b>kelas</b> yang dibaca. Token dibuat otomatis.') + `
                 <div class="px-6 pb-1 space-y-4">
                     <label id="swDrop" for="swFile"
-                           class="flex flex-col items-center justify-center gap-1 p-6 text-center transition border-2 border-dashed cursor-pointer rounded-2xl border-slate-300 bg-slate-50 hover:border-primary-400 hover:bg-primary-50/50">
+                           class="flex flex-col gap-1 justify-center items-center p-6 text-center rounded-2xl border-2 border-dashed transition cursor-pointer border-slate-300 bg-slate-50 hover:border-primary-400 hover:bg-primary-50/50">
                         <i class="mb-1 text-2xl fa-solid fa-cloud-arrow-up text-slate-400"></i>
                         <span id="swFileNama" class="text-sm font-semibold break-all text-slate-800">Klik atau tarik file ke sini</span>
                         <span class="text-xs text-slate-500">.xlsx, .xls, atau .csv (maks 2MB)</span>
                         <input id="swFile" type="file" accept=".xlsx,.xls,.csv" class="hidden">
                     </label>
-                    <div class="p-3 text-xs leading-relaxed border rounded-xl border-slate-200 bg-slate-50 text-slate-600">
+                    <div class="p-3 text-xs leading-relaxed rounded-xl border border-slate-200 bg-slate-50 text-slate-600">
                         Baris pertama harus berisi judul kolom <b>nama</b> dan <b>kelas</b>. Siswa yang namanya dan kelasnya sama dengan data yang sudah ada akan dilewati.
                     </div>
                 </div>`,
@@ -420,7 +492,7 @@ new class extends Component
             if (!items.length) return '';
             const sisa = total - items.length;
             return '<div><p class="mb-1.5 text-xs font-semibold tracking-wide uppercase text-slate-500">' + judul + '</p>'
-                 + '<ul class="p-3 space-y-1 overflow-y-auto text-xs border max-h-36 rounded-xl border-slate-200 text-slate-600">'
+                 + '<ul class="overflow-y-auto p-3 space-y-1 max-h-36 text-xs rounded-xl border border-slate-200 text-slate-600">'
                  + items.map(fmt).join('')
                  + (sisa > 0 ? '<li class="text-slate-400">... dan ' + sisa + ' lainnya</li>' : '')
                  + '</ul></div>';
@@ -450,17 +522,31 @@ new class extends Component
     }
 
     /* ---------- events (delegasi, namespace .export) ---------- */
-    $(document).on('change' + NS, '#fKelas', function () { filter.kelas = this.value; renderTabel(); });
-    $(document).on('change' + NS, '#fUrut',  function () { filter.urut  = this.value; renderTabel(); });
+    $(document).on('change' + NS, '#fKelas', function () { filter.kelas = this.value; halaman = 1; renderTabel(); });
+    $(document).on('change' + NS, '#fUrut',  function () { filter.urut  = this.value; halaman = 1; renderTabel(); });
+
+    $(document).on('change' + NS, '#fPerPage', function () {
+        const nilai = parseInt(this.value, 10);
+        perPage = PER_PAGE_OPSI.indexOf(nilai) !== -1 ? nilai : 30;
+        halaman = 1;
+        try { localStorage.setItem(PER_PAGE_KEY, String(perPage)); } catch (e) { /* abaikan */ }
+        renderTabel();
+    });
+    $(document).on('click' + NS, '.pg-export', function () {
+        const tujuan = parseInt($(this).attr('data-hal'), 10);
+        if (!tujuan || $(this).prop('disabled')) return;
+        halaman = tujuan;
+        renderTabel();
+    });
 
     $(document).on('input' + NS, '#fCari', function () {
         const nilai = this.value;
         clearTimeout(timerCari);
-        timerCari = setTimeout(function () { filter.q = nilai; renderTabel(); }, 200);
+        timerCari = setTimeout(function () { filter.q = nilai; halaman = 1; renderTabel(); }, 200);
     });
 
     $(document).on('click' + NS, '#fReset', function () {
-        filter.kelas = ''; filter.q = ''; filter.urut = 'kelas';
+        filter.kelas = ''; filter.q = ''; filter.urut = 'kelas'; halaman = 1;
         $('#fKelas').val('');
         $('#fUrut').val('kelas');
         $('#fCari').val('');

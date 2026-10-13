@@ -8,13 +8,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!$request->session()->has('id_admin')) {
+            // permintaan AJAX/JSON: balas 401 (bukan redirect HTML)
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'message' => 'Sesi admin berakhir. Silakan login ulang.',
+                ], 401);
+            }
+            return redirect('/admin');
+        }
+
         return $next($request);
     }
 }

@@ -1,11 +1,19 @@
+@php
+  $set = \App\Models\Settings::ambil();
+  $logo = $set->logoUrl();
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  {{-- WAJIB: dibaca oleh $.ajaxSetup untuk header X-CSRF-TOKEN --}}
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="description" content="Aplikasi {{ $set->judul_pemilihan }} untuk {{ $set->nama_sekolah }}" />
+  <link rel="canonical" href="https://evoteosisifsu-xyz.co.id">
+  <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+  
   <title>@yield('title', 'E-Vote OSIS')</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -14,20 +22,24 @@
 <body class="bg-slate-100">
   {{-- Navigation : Desktop Top --}}
   <header class="sticky top-0 z-40 border-b bg-navy-950/90 backdrop-blur-md border-slate-800">
-    <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
+    <div class="flex justify-between items-center px-6 py-4 mx-auto max-w-6xl">
 
-      <div class="z-10 flex items-center gap-3">
-        <div class="flex items-center justify-center w-12 h-12 text-lg font-bold bg-yellow-400 shadow-md rounded-xl text-navy-950">
-          <i class="text-[24px] fa-solid fa-check-to-slot"></i>
+      <div class="flex z-10 gap-3 items-center">
+        <div class="flex overflow-hidden justify-center items-center w-12 h-12 bg-yellow-400 rounded-xl shadow-md shrink-0 text-navy-950">
+          @if ($logo)
+            <img src="{{ $logo }}" alt="Logo {{ $set->nama_sekolah }}" class="w-full h-full object-contain">
+          @else
+            <i class="text-[24px] fa-solid fa-check-to-slot"></i>
+          @endif
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-wide text-white uppercase">E-Vote <span class="text-brand-yellow">OSIS</span></h1>
-          <p class="hidden text-xs text-slate-400 md:block">SMK Informatika Sumedang</p>
-          <p class="block text-xs uppercase text-slate-400 md:hidden">{{ session('nama') ?? 'User' }}</p>
+          <h3 class="text-xl font-bold tracking-wide uppercase text-white">E-Vote <span class="text-brand-yellow">OSIS</span></h3>
+          <p class="hidden text-xs text-slate-400 md:block">{{ $set->nama_sekolah }}</p>
+          <p class="block text-xs uppercase truncate text-slate-400 md:hidden">{{ session('nama') ?? 'User' }}</p>
         </div>
       </div>
 
-      <div class="absolute left-0 right-0 items-center justify-center hidden gap-4 md:flex">
+      <div class="hidden absolute right-0 left-0 gap-4 justify-center items-center md:flex">
         <a href="{{ route('siswa.voting') }}"
           class="inline-flex items-center gap-1.5 px-4 py-3 text-md font-bold transition-all
           {{ request()->routeIs('siswa.voting') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
@@ -40,13 +52,13 @@
         </a>
       </div>
 
-      <div class="z-10 flex items-center gap-3">
+      <div class="flex z-10 gap-3 items-center">
         <div class="hidden text-right md:block">
-          <p class="text-sm font-semibold text-white uppercase">{{ session('nama') ?? 'Users' }}</p>
+          <p class="text-sm font-semibold uppercase text-white">{{ session('nama') ?? 'Users' }}</p>
           <p class="text-xs uppercase text-slate-400">{{ session('kelas') ?? 'Kelas' }}</p>
         </div>
         <a href="{{ route('siswa.logout') }}"
-          class="flex items-center p-2 text-sm font-semibold text-white transition-colors bg-red-500 rounded-lg hover:bg-red-600 md:p-3 md:text-base">
+          class="flex items-center p-2 text-sm font-semibold text-white bg-red-500 rounded-lg transition-colors hover:bg-red-600 md:p-3 md:text-base">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span class="hidden ml-2 sm:block">Logout</span>
         </a>
@@ -55,8 +67,8 @@
   </header>
 
   {{-- Navigation : Mobile Bottom --}}
-  <nav class="fixed bottom-0 left-0 right-0 z-40 px-2 py-2 border-t md:hidden bg-navy-950/90 backdrop-blur-md border-slate-800">
-    <div class="flex items-center justify-center w-full gap-2">
+  <nav class="fixed right-0 bottom-0 left-0 z-40 px-2 py-2 border-t md:hidden bg-navy-950/90 backdrop-blur-md border-slate-800">
+    <div class="flex gap-2 justify-center items-center w-full">
       <a href="{{ route('siswa.voting') }}" class="inline-flex items-center gap-1.5 px-4 py-4 text-md w-1/2 justify-center font-bold transition-all {{ request()->routeIs('siswa.voting') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
         <i class="text-[16px] fa-solid fa-check-to-slot"></i>Voting
       </a>
@@ -67,36 +79,36 @@
   </nav>
 
   {{-- Content utama --}}
-  <main class="flex flex-col justify-center flex-1 w-full max-w-6xl px-6 py-8 mx-auto space-y-3 sm:px-6">
+  <main class="flex flex-col flex-1 justify-center px-6 py-8 mx-auto space-y-3 w-full max-w-6xl sm:px-6">
     @yield('content')
   </main>
 
   {{-- ============ MODAL 1 : Detail Visi & Misi ============ --}}
   <div id="popupModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
-    class="fixed inset-0 z-50 items-center justify-center hidden p-6 bg-slate-900/80 backdrop-blur-sm">
+    class="hidden fixed inset-0 z-50 justify-center items-center p-6 bg-slate-900/80 backdrop-blur-sm">
     <div class="relative flex flex-col w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white border-2 shadow-2xl rounded-3xl border-slate-100">
 
       <button id="closeBtn" type="button" aria-label="Tutup detail kandidat"
-        class="absolute z-10 flex items-center justify-center rounded-full shadow top-4 right-4 w-9 h-9 text-slate-500 bg-white/90 hover:text-slate-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        class="flex absolute top-4 right-4 z-10 justify-center items-center w-9 h-9 rounded-full shadow text-slate-500 bg-white/90 hover:text-slate-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         <i class="text-[20px] fa-solid fa-xmark"></i>
       </button>
 
-      <div class="relative flex items-center justify-center overflow-hidden border-b aspect-video bg-slate-50 border-slate-100 shrink-0">
-        <img id="modalImg" src="" alt="" class="object-cover w-full h-full">
+      <div class="flex overflow-hidden relative justify-center items-center border-b aspect-video bg-slate-50 border-slate-100 shrink-0">
+        <img id="modalImg" src="" alt="" class="w-full h-full object-cover" width="400" height="300">
       </div>
 
       <div class="p-4 sm:p-6">
         <h3 id="modalTitle" class="mb-4 text-3xl font-bold text-center text-slate-900"></h3>
 
-        <div class="h-48 space-y-4 overflow-y-auto text-slate-600">
-          <div class="p-4 border-2 border-yellow-200 bg-yellow-50 rounded-xl">
-            <h4 class="flex items-center gap-1 mb-1 text-lg font-bold uppercase text-slate-900">
+        <div class="overflow-y-auto space-y-4 h-48 text-slate-600">
+          <div class="p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
+            <h4 class="flex gap-1 items-center mb-1 text-lg font-bold uppercase text-slate-900">
               <i class="text-[20px] text-yellow-600 fa-solid fa-compass"></i> Visi
             </h4>
             <div id="modalVisi" class="text-sm leading-relaxed text-slate-600"></div>
           </div>
-          <div class="p-4 border-2 border-blue-200 bg-blue-50 rounded-xl">
-            <h4 class="flex items-center gap-1 mb-1 text-lg font-bold uppercase text-slate-900">
+          <div class="p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
+            <h4 class="flex gap-1 items-center mb-1 text-lg font-bold uppercase text-slate-900">
               <i class="text-[20px] text-blue-600 fa-solid fa-bullseye"></i> Misi
             </h4>
             <div id="modalMisi" class="text-sm leading-relaxed text-slate-600"></div>
@@ -106,7 +118,7 @@
         <div class="grid gap-3 pt-4 mt-4 border-t border-slate-100">
           {{-- ID unik: hanya satu #modalVoteBtn di seluruh halaman --}}
           <button id="modalVoteBtn" type="button"
-            class="flex items-center justify-center w-full gap-2 px-5 py-3 text-sm font-semibold text-blue-600 transition-colors bg-white border-2 border-blue-600 rounded-xl hover:bg-blue-600 hover:text-white">
+            class="flex gap-2 justify-center items-center px-5 py-3 w-full text-sm font-semibold text-blue-600 bg-white rounded-xl border-2 border-blue-600 transition-colors hover:bg-blue-600 hover:text-white">
             <i class="text-[16px] fa-solid fa-check-to-slot"></i> Pilih Kandidat Ini
           </button>
         </div>
@@ -117,22 +129,22 @@
   {{-- ============ MODAL 2 : Dialog E-Vote (pengganti SweetAlert) ============ --}}
   <div id="evDialog" role="alertdialog" aria-modal="true" aria-labelledby="evTitle" aria-describedby="evText"
     class="fixed inset-0 z-[60] items-center justify-center hidden p-6 bg-slate-900/80 backdrop-blur-sm">
-    <div id="evBox" class="w-full max-w-sm p-6 text-center transition-all duration-200 scale-95 bg-white border-2 shadow-2xl opacity-0 rounded-3xl border-slate-100">
-      <div id="evIcon" class="flex items-center justify-center w-20 h-20 mx-auto mb-4 text-3xl text-white shadow-md rounded-2xl bg-gradient-to-br"></div>
+    <div id="evBox" class="p-6 w-full max-w-sm text-center bg-white rounded-3xl border-2 transition-all duration-200 scale-95 shadow-2xl opacity-0 border-slate-100">
+      <div id="evIcon" class="flex justify-center items-center mx-auto mb-4 w-20 h-20 text-3xl text-white bg-gradient-to-br rounded-2xl shadow-md"></div>
       <h3 id="evTitle" class="text-2xl font-extrabold text-slate-800"></h3>
       <p id="evText" class="mt-2 text-sm leading-relaxed text-slate-600"></p>
 
       <div id="evProgressWrap" class="hidden mt-5">
-        <div class="h-2 overflow-hidden rounded-full bg-slate-100">
-          <div id="evProgress" class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-300" style="width:100%"></div>
+        <div class="overflow-hidden h-2 rounded-full bg-slate-100">
+          <div id="evProgress" class="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 rounded-full" style="width:100%"></div>
         </div>
       </div>
 
       <div id="evActions" class="grid grid-cols-2 gap-3 mt-6">
         <button id="evCancel" type="button"
-          class="px-5 py-3 text-sm font-semibold transition-colors bg-white border-2 rounded-xl text-slate-600 border-slate-300 hover:bg-slate-100">Batal</button>
+          class="px-5 py-3 text-sm font-semibold bg-white rounded-xl border-2 transition-colors text-slate-600 border-slate-300 hover:bg-slate-100">Batal</button>
         <button id="evConfirm" type="button"
-          class="px-5 py-3 text-sm font-semibold text-white transition-colors bg-blue-600 border-2 border-blue-600 rounded-xl hover:bg-blue-700">OK</button>
+          class="px-5 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl border-2 border-blue-600 transition-colors hover:bg-blue-700">OK</button>
       </div>
     </div>
   </div>

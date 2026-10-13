@@ -23,14 +23,16 @@ class UploadController extends Controller
             'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $path = $request->file('image')->store('kandidat', 'public');
+        $file = $request->file('image');
+        $nama = Str::lower(Str::random(10)) . '_kandidat.' . strtolower($file->extension());
+        $file->storeAs('kandidat', $nama, 'public');
 
         Kandidat::create([
             'nama'  => $request->nama,
             'kelas' => $request->kelas,
             'visi'  => $request->visi,
             'misi'  => $request->misi,
-            'image' => $path,
+            'image' => $nama,
         ]);
 
         return redirect()->route('admin.upload')->with('success', 'Kandidat berhasil ditambahkan');

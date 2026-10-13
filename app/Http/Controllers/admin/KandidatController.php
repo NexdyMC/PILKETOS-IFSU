@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kandidat;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -95,16 +96,18 @@ class KandidatController extends Controller
 
     private function simpanFoto(UploadedFile $file): string
     {
-        $dir = public_path('upload/photo');
-        File::ensureDirectoryExists($dir);
+        $disk = Storage::disk('public');
 
-        $name = Str::random(10) . '.' . strtolower($file->extension());
-        $file->move($dir, $name);
+        do {
+            $name = Str::lower(Str::random(10)) . '_kandidat.' . strtolower($file->extension());
+        } while ($disk->exists('kandidat/' . $name));
+
+        $file->storeAs('kandidat', $name, 'public');
 
         return $name;
     }
-
-    private function hapusFoto(?string $name): void
+    
+    public function hapusFoto(?string $name): void
     {
         if ($name) {
             File::delete(public_path('upload/photo/' . basename($name)));
