@@ -1,13 +1,3 @@
-<?php
-
-use Livewire\Component;
-
-new class extends Component
-{
-    //
-};
-?>
-
 <div id="siswa-app" class="p-4 space-y-8 sm:p-8"
      data-url-list="{{ url('/api/admin/siswa') }}"
      data-url-store="{{ route('admin.siswa.store') }}"

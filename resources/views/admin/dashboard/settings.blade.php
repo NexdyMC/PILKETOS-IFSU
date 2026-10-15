@@ -1,13 +1,3 @@
-<?php
-
-use Livewire\Component;
-
-new class extends Component
-{
-    //
-};
-?>
-
 <div id="settings-app" class="p-4 space-y-6 sm:p-8"
      data-url-data="{{ url('/api/admin/settings') }}"
      data-url-save="{{ url('/admin/settings') }}"

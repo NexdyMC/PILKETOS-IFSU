@@ -1,13 +1,3 @@
-<?php
-
-use Livewire\Component;
-
-new class extends Component
-{
-    //
-};
-?>
-
 <div id="export-app" class="p-4 space-y-6 sm:p-8"
      data-url-list="{{ url('/api/admin/siswa') }}"
      data-url-pdf="{{ route('admin.export.pdf') }}"

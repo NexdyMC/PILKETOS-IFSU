@@ -4,17 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Aplikasi E-Vote OSIS Untuk SMK INFORMATIKA SUMEDANG" />
     <link rel="canonical" href="https://evoteosisifsu-xyz.co.id">
-    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-    
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
     <title>Login Siswa — E-Voting OSIS</title>
     
     <!-- link : CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script href="../assets/script/tailwind.config.js"></script>
+    <script src="{{ asset('js/tailwind.config.js') }}"></script>
     
     <!-- CDN : Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -29,16 +27,16 @@
                 <div class="flex gap-5 justify-center items-center mb-6">
                 
                     <!-- 1. Logo SMK (Kiri - Ukuran Sedang) -->
-                    <img src="../assets/images/logo-osis.png" alt="Logo SMK"
+                    <img src="{{ asset('assets/images/logo-osis.png') }}" alt="Logo SMK"
                         class="p-2 w-auto h-20 bg-gray-100 rounded-full object-contain duration-300 drop-shadow-md hover:scale-110" width="80" height="80">
 
                     <!-- 2. Logo IFSU (Tengah - Ukuran Lebih Besar) -->
-                    <img src="../assets/images/logo-smk.png" alt="Logo IFSU"
+                    <img src="{{ asset('assets/images/logo-smk.png') }}" alt="Logo IFSU"
                         class="p-2 w-auto h-24 bg-gray-100 rounded-full object-contain duration-300 scale-105 drop-shadow-md hover:scale-110" width="100" height="100">
 
                     <!-- 3. Logo OSIS (Kanan - Ukuran Sedang) -->
-                    <img src="../assets/images/logo-mpk.png" alt="Logo OSIS"
-                        class="p-2 w-auto h-20 bg-gray-100 rounded-full object-contain duration-300 drop-shadow-md hover:scale-110" width="80" height="80" >
+                    <img src="{{ asset('assets/images/logo-mpk.png') }}" alt="Logo OSIS"
+                        class="p-2 w-auto h-20 bg-gray-100 rounded-full object-contain duration-300 drop-shadow-md hover:scale-110" width="80" height="80">
                 </div>
                 
 

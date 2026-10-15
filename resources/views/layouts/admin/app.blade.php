@@ -10,12 +10,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description" content="Aplikasi {{ $set->judul_pemilihan }} untuk {{ $set->nama_sekolah }}" />
 
   <link rel="canonical" href="https://evoteosisifsu-xyz.co.id">
-  <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
   
   <title>{{ ($title ?? 'Dashboard') . ' - ' . $set->judul_pemilihan }}</title>
   

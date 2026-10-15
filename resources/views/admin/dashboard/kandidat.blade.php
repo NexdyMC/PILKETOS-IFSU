@@ -1,13 +1,3 @@
-<?php
-
-use Livewire\Component;
-
-new class extends Component
-{
-    //
-};
-?>
-
 <div id="kandidat-app" class="p-4 sm:p-8" data-url-list="{{ route('kandidat.api.list') }}" data-url-store="{{ route('kandidat.api.store') }}" data-url-base="{{ url('admin/kandidat') }}" data-csrf="{{ csrf_token() }}">
   <div class="flex items-center justify-between mb-6">
     <div>
