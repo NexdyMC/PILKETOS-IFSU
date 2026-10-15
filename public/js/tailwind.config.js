@@ -31,6 +31,24 @@ tailwind.config = {
         display: ['Poppins', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },
+      // ===== TAMBAHAN =====
+      keyframes: {
+        'fade-up': {
+          '0%':   { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%':      { transform: 'translateY(-12px)' },
+        },
+      },
+      animation: {
+        'fade-up': 'fade-up 0.6s ease-out both',
+        'float':   'float 6s ease-in-out infinite',
+      },
+      boxShadow: {
+        'glow': '0 10px 40px -10px rgba(250, 204, 21, 0.45)',
+      },
     }
   }
 }

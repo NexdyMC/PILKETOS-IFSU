@@ -3,7 +3,7 @@
 @section('cdn')
   <!-- CDN : Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="{{ asset('js/tailwind-config.js') }}"></script>
+  <script src="{{ asset('js/tailwind.config.js') }}"></script>
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
   <!-- CDN : Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

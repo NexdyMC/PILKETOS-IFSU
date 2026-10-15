@@ -12,18 +12,34 @@ class VotingController extends Controller
 {
     public function index()
     {
-        // voting tertutup / belum dimulai / sudah berakhir: tampilkan halaman info (bukan surat suara)
-        // $setting = Settings::ambil();
-        // if (!$setting->votingBuka()) {
-        //     return response()->view('siswa.voting.tutup', [
-        //         'setting' => $setting,
-        //         'status'  => $setting->statusJadwal(),
-        //     ]);
-        // }
+        $pengaturan = Settings::ambil();
+        $votingBuka = $pengaturan->votingBuka();
+        $kandidat   = Kandidat::all();
 
-        $kandidat = Kandidat::all();
+        $siswa = [
+            'nama'  => session('nama') ?? 'Siswa',
+            'kelas' => session('kelas') ?? '-',
+        ];
 
-        return view('siswa.voting.index', compact('kandidat'));
+        $jam    = now('Asia/Jakarta')->hour;
+        $sapaan = match (true) {
+            $jam >= 4 && $jam < 11  => 'Selamat pagi',
+            $jam >= 11 && $jam < 15 => 'Selamat siang',
+            $jam >= 15 && $jam < 18 => 'Selamat sore',
+            default                 => 'Selamat malam',
+        };
+
+        // dummy: nanti bisa dipindah ke tabel/config
+        $langkahVoting = [
+            ['ikon' => 'fa-user-check',      'judul' => 'Masuk dengan Token',   'deskripsi' => 'Login memakai token unik dari panitia. Jangan berikan token Anda kepada siapa pun.'],
+            ['ikon' => 'fa-book-open',       'judul' => 'Kenali Kandidat',      'deskripsi' => 'Baca visi dan misi setiap kandidat. Klik kartu kandidat untuk melihat selengkapnya.'],
+            ['ikon' => 'fa-check-to-slot',   'judul' => 'Pilih Satu Kandidat',  'deskripsi' => 'Tekan "Pilih Kandidat Ini" lalu konfirmasi. Suara hanya bisa diberikan satu kali.'],
+            ['ikon' => 'fa-right-from-bracket', 'judul' => 'Selesai',           'deskripsi' => 'Setelah suara tersimpan, Anda otomatis keluar dari sistem.'],
+        ];
+
+        return view('siswa.voting.index', compact(
+            'kandidat', 'pengaturan', 'votingBuka', 'siswa', 'sapaan', 'langkahVoting'
+        ));
     }
 
     public function vote(Request $request)
