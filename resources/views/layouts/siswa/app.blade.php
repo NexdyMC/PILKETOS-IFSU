@@ -79,7 +79,7 @@
   </nav>
 
   {{-- Content utama --}}
-  <main class="flex flex-col flex-1 justify-center px-6 py-8 mx-auto space-y-3 w-full max-w-6xl sm:px-6">
+  <main class="flex flex-col flex-1 justify-center px-6 py-8 mx-auto space-y-3 w-full max-w-6xl sm:px-6 min-h-screen">
     @yield('content')
   </main>
 

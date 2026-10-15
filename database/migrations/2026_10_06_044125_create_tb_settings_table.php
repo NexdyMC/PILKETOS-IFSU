@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -20,6 +21,16 @@ return new class extends Migration
             $table->string('logo_sekolah', 100)->nullable();
             $table->timestamps();
         });
+        DB::table('tb_settings')->insert([
+            'nama_sekolah'      => 'SMK INFORMATIKA SUMEDANG',
+            'judul_pemilihan' => 'Pemilihan OSIS 2023',
+            'tahun_ajaran'    => '2023/2024',
+            'status_voting'   => 0,
+            'view_voted'      => 0,
+            'waktu_mulai'     => now(),
+            'waktu_selesai'   => now(),
+            'logo_sekolah'    => null,
+        ]);
     }
 
     public function down(): void

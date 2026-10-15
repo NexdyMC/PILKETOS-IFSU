@@ -112,7 +112,7 @@ class Settings extends Model
 
         $disk = Storage::disk('public');
         if ($disk->exists('logo/' . $nama)) {
-            return asset('storage/app/public/logo/' . $nama) . '?v=' . $disk->lastModified('logo/' . $nama);
+            return asset('storage/logo/' . $nama) . '?v=' . $disk->lastModified('logo/' . $nama);
         }
         if (file_exists(public_path('images/' . $nama))) {
             return asset('images/' . $nama);

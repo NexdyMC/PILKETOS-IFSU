@@ -33,6 +33,7 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     /* ---------- upload kandidat ---------- */
     Route::get('/admin/upload', [UploadController::class, 'create'])->name('admin.upload');
+    
     Route::post('/admin/upload', [UploadController::class, 'store'])->name('kandidat.store');
 
     /* ---------- halaman dashboard (Livewire) ---------- */

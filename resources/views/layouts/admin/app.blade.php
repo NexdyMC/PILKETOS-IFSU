@@ -91,7 +91,7 @@
           </div>
           <!-- Profil Admin -->
           <div class="flex gap-3 items-center shrink-0">
-            <img src="" alt="Foto Admin" class="w-10 h-10 rounded-full border-2 object-cover border-primary-100">
+            <img src="{{ $logo }}" alt="Foto Admin" class="w-10 h-10 rounded-full border-2 object-cover border-primary-100">
             <div class="hidden text-right sm:block">
               <p class="text-sm font-semibold leading-tight text-navy-900">Febri Pratama</p>
               <p class="text-xs text-slate-500">Admin Pemilu</p>

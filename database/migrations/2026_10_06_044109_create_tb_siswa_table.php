@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -18,6 +19,13 @@ return new class extends Migration
             $table->integer('status')->default(0);
             $table->integer('voted')->default(0);
         });
+        DB::table('tb_siswa')->insert([
+            'nama'      => 'Febri Pratama',
+            'kelas'     => 'XII - RPL 1',
+            'token'     => '1234',
+            'status'    => 0,
+            'voted'     => 0,
+        ]);
     }
 
     /**

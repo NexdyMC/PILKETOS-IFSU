@@ -34,7 +34,7 @@
             <i class="text-[20px] fa-solid fa-info"></i>
           </div>
           <div class="flex-1 min-w-0">
-            <h4 class="text-sm font-bold leading-snug text-slate-900 sm:text-base">Penting Diperhatikan!</h4>
+            <h4 class="text-sm font-bold text-left leading-snug text-slate-900 sm:text-base">Penting Diperhatikan!</h4>
             <p class="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium leading-relaxed text-left">
               Anda hanya dapat memilih satu kali dan tidak dapat mengubah pilihan setelahnya! Klik kartu kandidat untuk melihat visi &amp; misi selengkapnya.
             </p>
@@ -45,9 +45,9 @@
   </div>
 
   <div class="flex relative gap-4 justify-center items-center max-w-7xl">
-    <div id="scroll-container" class="grid grid-cols-1 gap-4 h-full md:grid-cols-3">
-      @foreach ($kandidat as $index => $row)
-        <div class="flex overflow-hidden relative flex-col w-full h-full bg-white rounded-3xl border-2 transition-all duration-300 shadow-md cursor-pointer hover:-translate-y-2 md:hover:-translate-y-4 hover:shadow-xl hover:border-blue-500 border-slate-300/80 group kandidat-item"
+    <div id="scroll-container" class="flex flex-wrap gap-4 h-full justify-center">
+      @forelse ($kandidat as $index => $row)
+        <div class="flex overflow-hidden relative flex-col max-w-[320px] w-full h-full bg-white rounded-3xl border-2 transition-all duration-300 shadow-md cursor-pointer hover:-translate-y-2 md:hover:-translate-y-4 hover:shadow-xl hover:border-blue-500 border-slate-300/80 group kandidat-item"
           data-id="{{ $row->id }}"
           data-nama="{{ $row->nama }}"
           data-image="{{ $row->image_url }}"
@@ -98,7 +98,13 @@
             <div class="hidden kandidat-misi">{{ $row->misi }}</div>
           </div>
         </div>
-      @endforeach
+      @empty
+        <div class="flex flex-col gap-4 justify-center items-center w-full p-6 text-center rounded-2xl bg-slate-100 shadow-lg rouderd-xl">
+          <i class="text-[48px] text-slate-400 fa-solid fa-circle-exclamation"></i>
+          <h3 class="text-lg font-bold text-slate-800">Belum ada kandidat</h3>
+          <p class="text-sm text-slate-600">Saat ini belum ada kandidat yang tersedia untuk dipilih.</p>
+        </div>
+      @endforelse
     </div>
   </div>
 @endsection
