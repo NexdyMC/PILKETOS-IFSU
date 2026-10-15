@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kandidat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class UploadController extends Controller
 {

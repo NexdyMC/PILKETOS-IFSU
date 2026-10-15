@@ -25,10 +25,6 @@ Route::post('/admin/login', [LoginController::class, 'login'])->name('admin.chec
 
 Route::get('/admin/logout', [LoginController::class, 'logout'])->name('admin.logout');
 
-Route::get('/admin/upload', [UploadController::class, 'create'])->name('admin.upload');
-
-Route::post('/admin/upload', [UploadController::class, 'store'])->name('kandidat.store');
-
 Route::middleware(AdminMiddleware::class)->group(function () {
 
     /* ---------- upload kandidat ---------- */

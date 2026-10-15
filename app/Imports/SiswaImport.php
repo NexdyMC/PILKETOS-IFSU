@@ -168,14 +168,8 @@ class SiswaImport implements OnEachRow, WithHeadingRow
     /** Token 4 karakter (tanpa O/0/I/1), dicek ke daftar di memori, tanpa query per baris. */
     private function buatToken(): string
     {
-        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        $max   = strlen($chars) - 1;
-
         do {
-            $token = '';
-            for ($i = 0; $i < 4; $i++) {
-                $token .= $chars[random_int(0, $max)];
-            }
+            $token = random_token(4);
         } while (isset($this->tokenTerpakai[$token]));
 
         $this->tokenTerpakai[$token] = true;

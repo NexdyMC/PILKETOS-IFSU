@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Kandidat;
+use App\Models\Settings;
 use App\Models\Siswa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 class HomeController extends Controller
 {
-    private const SESSION_KEYS = ['user', 'siswa'];
+    private const SESSION_KEYS = ['user', 'siswa', 'token'];
 
     private const BERAKHIR_DEFAULT = '2026-09-26 08:00:00';
 
@@ -46,9 +45,9 @@ class HomeController extends Controller
             return response()->json(['message' => 'Sesi login tidak ditemukan. Silakan login ulang.'], 401);
         }
  
-        $voting = $this->statusVoting();
-        if (!$voting['buka']) {
-            return response()->json(['message' => $voting['pesan']], 403);
+        $setting = Settings::ambil();
+        if (!$setting->votingBuka()) {
+            return response()->json(['message' => $setting->pesanTutup()], 403);
         }
  
         // satu query atomik: hanya berhasil jika siswa ini masih belum memilih
@@ -69,6 +68,15 @@ class HomeController extends Controller
     /** Ambil siswa yang sedang login dari session (selalu dibaca ulang dari database). */
     private function siswaDariSesi(): ?Siswa
     {
+        // Cek langsung session token (yang diset oleh Siswa\LoginController)
+        if (session()->has('token')) {
+            $token = session('token');
+            $siswa = Siswa::find($token);
+            if ($siswa) {
+                return $siswa;
+            }
+        }
+
         foreach (self::SESSION_KEYS as $key) {
             $data  = session($key);
             $token = is_array($data) ? ($data['token'] ?? null) : (is_object($data) ? ($data->token ?? null) : null);
@@ -83,39 +91,16 @@ class HomeController extends Controller
         return null;
     }
  
-    /** Status voting dari tb_settings (status_voting, waktu_mulai, waktu_selesai). */
+    /** Status voting memanfaatkan model Settings yang sudah di-cache */
     private function statusVoting(): array
     {
-        $now = Carbon::now();
-        $pengaturan = null;
- 
-        try {
-            $pengaturan = DB::table('tb_settings')->first();
-        } catch (\Throwable $e) {
-            report($e);
-        }
- 
-        $mulai   = $pengaturan && data_get($pengaturan, 'waktu_mulai')   ? Carbon::parse($pengaturan->waktu_mulai)   : null;
-        $selesai = $pengaturan && data_get($pengaturan, 'waktu_selesai') ? Carbon::parse($pengaturan->waktu_selesai) : null;
- 
-        $buka  = true;
-        $pesan = '';
- 
-        if ($pengaturan && (int) data_get($pengaturan, 'status_voting', 1) !== 1) {
-            $buka  = false;
-            $pesan = 'Voting sedang ditutup oleh panitia.';
-        } elseif ($mulai && $now->lt($mulai)) {
-            $buka  = false;
-            $pesan = 'Voting belum dimulai.';
-        } elseif ($selesai && $now->gt($selesai)) {
-            $buka  = false;
-            $pesan = 'Waktu voting telah berakhir.';
-        }
- 
+        $setting = Settings::ambil();
+        $buka = $setting->votingBuka();
+
         return [
             'buka'     => $buka,
-            'pesan'    => $pesan,
-            'berakhir' => ($selesai ?: Carbon::parse(self::BERAKHIR_DEFAULT))->timestamp,
+            'pesan'    => $buka ? '' : $setting->pesanTutup(),
+            'berakhir' => $setting->waktu_selesai ? $setting->waktu_selesai->timestamp : Carbon::parse(self::BERAKHIR_DEFAULT)->timestamp,
         ];
     }
 }
