@@ -25,13 +25,13 @@
     <div class="flex justify-between items-center px-6 py-4 mx-auto max-w-6xl">
 
       <div class="flex z-10 gap-3 items-center">
-        <div class="flex overflow-hidden justify-center items-center w-12 h-12 bg-yellow-400 rounded-xl shadow-md shrink-0 text-navy-950">
-          @if ($logo)
-            <img src="{{ $logo }}" alt="Logo {{ $set->nama_sekolah }}" class="w-full h-full object-contain">
-          @else
-            <i class="text-[24px] fa-solid fa-check-to-slot"></i>
+        @if ($logo)
+        <img src="{{ $logo }}" alt="Logo {{ $set->nama_sekolah }}" width="48" height="48" class="w-12 h-12 object-contain">
+        @else
+          <div class="flex overflow-hidden justify-center items-center w-12 h-12 bg-yellow-400 rounded-xl shadow-md shrink-0 text-navy-950">
+            <i class="text-[24px] text-white fa-solid fa-check-to-slot"></i>
+          </div>
           @endif
-        </div>
         <div>
           <h3 class="text-xl font-bold tracking-wide uppercase text-white">E-Vote <span class="text-brand-yellow">OSIS</span></h3>
           <p class="hidden text-xs text-slate-400 md:block">{{ $set->nama_sekolah }}</p>

@@ -27,9 +27,8 @@ class KandidatController extends Controller
     {
         $data = $this->validated($request);
 
-        // form lama tidak punya "kelas"; isi kosong agar aman kalau kolomnya NOT NULL
-        $data['kelas'] = $data['kelas'] ?? '';
-        $data['image'] = $request->hasFile('foto') ? $this->simpanFoto($request->file('foto')) : null;
+        // kolom image NOT NULL; kalau tidak ada foto, isi string kosong (accessor image_url memakai placeholder)
+        $data['image'] = $request->hasFile('foto') ? $this->simpanFoto($request->file('foto')) : '';
 
         $kandidat = Kandidat::create($data);
 
@@ -80,15 +79,21 @@ class KandidatController extends Controller
     {
         $validated = $request->validate([
             'nama'  => ['required', 'string', 'max:255'],
-            'kelas' => ['nullable', 'string', 'max:100'],
+            'kelas' => ['required', 'string', 'max:100'],
             'visi'  => ['required', 'string'],
             'misi'  => ['required', 'string'],
             'foto'  => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
         ], [
-            'foto.image' => 'File harus berupa gambar (PNG/JPG/WEBP).',
-            'foto.mimes' => 'Format foto harus PNG, JPG, atau WEBP.',
-            'foto.max'   => 'Ukuran foto maksimal 2MB.',
+            'nama.required'  => 'Nama kandidat wajib diisi.',
+            'kelas.required' => 'Kelas kandidat wajib diisi.',
+            'kelas.max'      => 'Kelas maksimal 100 karakter.',
+            'foto.image'     => 'File harus berupa gambar (PNG/JPG/WEBP).',
+            'foto.mimes'     => 'Format foto harus PNG, JPG, atau WEBP.',
+            'foto.max'       => 'Ukuran foto maksimal 2MB.',
         ]);
+
+        // rapikan spasi berlebih di kelas, mis. "  11  RPL 1 " -> "11 RPL 1"
+        $validated['kelas'] = trim(preg_replace('/\s+/', ' ', $validated['kelas']));
 
         unset($validated['foto']);
         return $validated;
@@ -106,11 +111,19 @@ class KandidatController extends Controller
 
         return $name;
     }
-    
+
     public function hapusFoto(?string $name): void
     {
-        if ($name) {
-            File::delete(public_path('upload/photo/' . basename($name)));
+        if (!$name) {
+            return;
         }
+
+        $nama = basename($name);
+
+        // foto baru: disimpan di storage/app/public/kandidat
+        Storage::disk('public')->delete('kandidat/' . $nama);
+
+        // foto lama (sebelum dipindah ke storage)
+        File::delete(public_path('upload/photo/' . $nama));
     }
 }

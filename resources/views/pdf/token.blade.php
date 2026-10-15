@@ -12,7 +12,7 @@
   .pagenum:before { content: counter(page); }
 
   .kop { border-bottom: 2px solid #1d4ed8; padding-bottom: 8px; margin-bottom: 14px; }
-  .kop .judul { font-size: 16px; font-weight: bold; color: #1e3a8a; }
+  .kop .judul { font-size: 16px; font-weight: bold; color: #FACC15; }
   .kop .sub { font-size: 10px; color: #475569; margin-top: 2px; }
   h2 { font-size: 14px; margin: 0 0 3px 0; }
   .meta { font-size: 10px; color: #64748b; margin: 0 0 10px 0; }
@@ -50,7 +50,7 @@
 <div class="{{ $loop->last ? '' : 'pisah' }}">
 
   <div class="kop">
-    <div class="judul">{{ $pengaturan['judul'] }}</div>
+    <div class="judul">E-VOTE OSIS</div>
     <div class="sub">{{ $pengaturan['sekolah'] }}@if ($pengaturan['tahun']) &middot; Tahun Ajaran {{ $pengaturan['tahun'] }}@endif</div>
   </div>
 

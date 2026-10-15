@@ -59,6 +59,10 @@ new class extends Component
             <input type="text" name="nama" id="inputNamaKandidat" required placeholder="cth. Aditya Pratama & Salsa Nabila" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm">
           </div>
           <div>
+            <label class="text-sm font-medium text-navy-700 mb-1.5 block">Kelas</label>
+            <input type="text" name="kelas" id="inputKelasKandidat" required maxlength="100" placeholder="cth. 11 RPL 1" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm">
+          </div>
+          <div>
             <label class="text-sm font-medium text-navy-700 mb-1.5 block">Visi</label>
             <textarea name="visi" id="inputVisiKandidat" rows="3" required placeholder="Tuliskan visi paslon..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm resize-none"></textarea>
           </div>
@@ -171,7 +175,8 @@ new class extends Component
         </div>
 
         <div class="flex-1 p-5">
-          <p class="mb-2 text-xl font-bold text-center font-display line-clamp-1 text-navy-900">${esc(row.nama)}</p>
+          <p class="mb-1 text-xl font-bold text-center font-display line-clamp-1 text-navy-900">${esc(row.nama)}</p>
+          <p class="mb-3 text-sm font-semibold tracking-wide text-center uppercase text-slate-500">${esc(row.kelas || '-')}</p>
 
           <div class="flex justify-center mb-5">
             <span class="px-3 py-1 text-xs font-bold tracking-widest border rounded-full text-accent-500 bg-accent-400/15 border-accent-400/30">
@@ -238,6 +243,7 @@ new class extends Component
       $('#modalKandidatTitle').text('Edit Kandidat');
       $('#inputKandidatId').val(data.id);
       $('#inputNamaKandidat').val(data.nama);
+      $('#inputKelasKandidat').val(data.kelas);
       $('#inputVisiKandidat').val(data.visi);
       $('#inputMisiKandidat').val(data.misi);
       if (data.image) $('#previewFotoKandidat').attr('src', data.image_url);

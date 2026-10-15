@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\siswa;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Siswa;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-
     public function index() 
     {
         if (session()->has('token') && session()->has('nama')) {
@@ -19,7 +19,8 @@ class LoginController extends Controller
 
         return view('siswa.login');
     }
-    public function login(Request $request)
+
+    public function login(Request $request): JsonResponse
     {
         // 1. Validasi input
         $request->validate([
@@ -34,7 +35,7 @@ class LoginController extends Controller
             return response()->json([
                 'success' => false, 
                 'message' => 'Token tidak valid'
-            ], 401); // Gunakan 401 Unauthorized
+            ], 401);
         }
 
         // 4. Cek apakah siswa sudah voting
@@ -42,7 +43,7 @@ class LoginController extends Controller
             return response()->json([
                 'success' => false, 
                 'message' => 'Kamu sudah melakukan voting'
-            ], 403); // 403 Forbidden
+            ], 403);
         }
 
         // 5. Regenerasi session ID untuk keamanan
@@ -50,10 +51,10 @@ class LoginController extends Controller
 
         // 6. Simpan data siswa ke session
         session([
-            'token' => $siswa->token,
-            'nama'  => $siswa->nama,
-            'kelas' => $siswa->kelas,
-            'is_logged_in' => true // Opsional: flag login
+            'token'        => $siswa->token,
+            'nama'         => $siswa->nama,
+            'kelas'        => $siswa->kelas,
+            'is_logged_in' => true,
         ]);
 
         // 7. Berikan response JSON
