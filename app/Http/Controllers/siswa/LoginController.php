@@ -14,6 +14,10 @@ class LoginController extends Controller
     public function index() 
     {
         if (session()->has('token') && session()->has('nama')) {
+            $siswa = Siswa::where('token', session('token'))->first();
+            if ($siswa && $siswa->status == 1) {
+                return redirect()->route('siswa.hasil');
+            }
             return redirect()->route('siswa.voting');
         }
 
@@ -38,8 +42,11 @@ class LoginController extends Controller
             ], 401);
         }
 
-        // 4. Cek apakah siswa sudah voting
-        if ($siswa->status == 1) {
+        $isGuru = strcasecmp(trim((string) $siswa->kelas), 'guru') === 0;
+
+        // 4. Cek apakah pemilih sudah voting
+        // Siswa yang sudah voting ditolak; Guru yang sudah voting tetap diizinkan login
+        if ($siswa->status == 1 && !$isGuru) {
             return response()->json([
                 'success' => false, 
                 'message' => 'Kamu sudah melakukan voting'
@@ -54,14 +61,20 @@ class LoginController extends Controller
             'token'        => $siswa->token,
             'nama'         => $siswa->nama,
             'kelas'        => $siswa->kelas,
+            'status'       => (int) $siswa->status,
             'is_logged_in' => true,
         ]);
 
         // 7. Berikan response JSON
+        // Guru yang sudah voting langsung diarahkan ke halaman hasil
+        $targetRoute = ($isGuru && $siswa->status == 1)
+            ? route('siswa.hasil')
+            : route('siswa.voting');
+
         return response()->json([
             'success'  => true,
             'message'  => 'Login berhasil',
-            'redirect' => route('siswa.voting')
+            'redirect' => $targetRoute
         ]);
     }
 

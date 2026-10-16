@@ -1,6 +1,11 @@
 @php
   $set = \App\Models\Settings::ambil();
   $logo = $set->logoUrl();
+  $token = session('token');
+  $currentUser = $token ? \App\Models\Siswa::where('token', $token)->first() : null;
+  $isGuru = strcasecmp(trim((string) ($currentUser?->kelas ?? session('kelas'))), 'guru') === 0;
+  $sudahVoting = ($currentUser?->status ?? session('status', 0)) == 1;
+  $canViewHasil = $isGuru || $sudahVoting;
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -40,16 +45,33 @@
       </div>
 
       <div class="hidden absolute right-0 left-0 gap-4 justify-center items-center md:flex">
-        <a href="{{ route('siswa.voting') }}"
-          class="inline-flex items-center gap-1.5 px-4 py-3 text-md font-bold transition-all
-          {{ request()->routeIs('siswa.voting') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
-          <i class="text-[16px] fa-solid fa-check-to-slot"></i>Voting
-        </a>
-        <a href="{{ route('siswa.hasil') }}"
-          class="inline-flex items-center gap-1.5 px-4 py-3 text-md font-bold transition-all
-          {{ request()->routeIs('siswa.hasil') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
-          <i class="fa-solid fa-chart-line"></i>Hasil
-        </a>
+        {{-- Tombol Voting --}}
+        @if ($sudahVoting && !$isGuru)
+          <a href="{{ route('siswa.hasil') }}" title="Anda sudah memberikan suara"
+            class="inline-flex items-center gap-1.5 px-4 py-3 text-md font-bold transition-all text-slate-400 hover:text-slate-200">
+            <i class="text-[16px] fa-solid fa-circle-check text-emerald-400"></i>Voting
+          </a>
+        @else
+          <a href="{{ route('siswa.voting') }}"
+            class="inline-flex items-center gap-1.5 px-4 py-3 text-md font-bold transition-all
+            {{ request()->routeIs('siswa.voting') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
+            <i class="text-[16px] fa-solid fa-check-to-slot"></i>Voting
+          </a>
+        @endif
+
+        {{-- Tombol Hasil --}}
+        @if ($canViewHasil)
+          <a href="{{ route('siswa.hasil') }}"
+            class="inline-flex items-center gap-1.5 px-4 py-3 text-md font-bold transition-all
+            {{ request()->routeIs('siswa.hasil') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
+            <i class="fa-solid fa-chart-line"></i>Hasil
+          </a>
+        @else
+          <span title="Lakukan voting terlebih dahulu untuk melihat hasil pemilihan"
+            class="inline-flex items-center gap-1.5 px-4 py-3 text-md font-bold text-slate-500 bg-slate-800/40 border border-slate-700/50 rounded-lg cursor-not-allowed select-none opacity-60">
+            <i class="fa-solid fa-lock text-xs text-slate-500"></i>Hasil
+          </span>
+        @endif
       </div>
 
       <div class="flex z-10 gap-3 items-center">
@@ -69,62 +91,46 @@
   {{-- Navigation : Mobile Bottom --}}
   <nav class="fixed right-0 bottom-0 left-0 z-40 px-2 py-2 border-t md:hidden bg-navy-950/90 backdrop-blur-md border-slate-800">
     <div class="flex gap-2 justify-center items-center w-full">
-      <a href="{{ route('siswa.voting') }}" class="inline-flex items-center gap-1.5 px-4 py-4 text-md w-1/2 justify-center font-bold transition-all {{ request()->routeIs('siswa.voting') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
-        <i class="text-[16px] fa-solid fa-check-to-slot"></i>Voting
-      </a>
-      <a href="{{ route('siswa.hasil') }}" class="inline-flex items-center gap-1.5 px-4 py-4 text-md w-1/2 justify-center font-bold transition-all {{ request()->routeIs('siswa.hasil') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
-        <i class="fa-solid fa-chart-line"></i>Hasil
-      </a>
+      @if ($sudahVoting && !$isGuru)
+        <a href="{{ route('siswa.hasil') }}" class="inline-flex items-center gap-1.5 px-4 py-3.5 text-sm w-1/2 justify-center font-bold transition-all text-slate-400">
+          <i class="text-[14px] fa-solid fa-circle-check text-emerald-400"></i>Voting
+        </a>
+      @else
+        <a href="{{ route('siswa.voting') }}" class="inline-flex items-center gap-1.5 px-4 py-3.5 text-sm w-1/2 justify-center font-bold transition-all {{ request()->routeIs('siswa.voting') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
+          <i class="text-[14px] fa-solid fa-check-to-slot"></i>Voting
+        </a>
+      @endif
+
+      @if ($canViewHasil)
+        <a href="{{ route('siswa.hasil') }}" class="inline-flex items-center gap-1.5 px-4 py-3.5 text-sm w-1/2 justify-center font-bold transition-all {{ request()->routeIs('siswa.hasil') ? 'text-white bg-gradient-to-br to-amber-500 from-amber-300 rounded-lg shadow-md' : 'text-slate-300 hover:text-brand-yellow' }}">
+          <i class="fa-solid fa-chart-line"></i>Hasil
+        </a>
+      @else
+        <span title="Lakukan voting terlebih dahulu untuk melihat hasil pemilihan"
+          class="inline-flex items-center gap-1.5 px-4 py-3.5 text-sm w-1/2 justify-center font-bold text-slate-500 bg-slate-800/40 border border-slate-700/50 rounded-lg cursor-not-allowed select-none opacity-60">
+          <i class="fa-solid fa-lock text-xs text-slate-500"></i>Hasil
+        </span>
+      @endif
     </div>
   </nav>
 
   {{-- Content utama --}}
   <main class="flex flex-col flex-1 justify-center px-6 py-8 mx-auto space-y-3 w-full max-w-6xl sm:px-6 min-h-screen">
+    @if (session('error'))
+      <div class="p-4 text-sm text-red-700 bg-red-100 rounded-2xl border border-red-200 flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation text-base shrink-0"></i>
+        <span>{{ session('error') }}</span>
+      </div>
+    @endif
+    @if (session('info'))
+      <div class="p-4 text-sm text-blue-700 bg-blue-100 rounded-2xl border border-blue-200 flex items-center gap-2">
+        <i class="fa-solid fa-circle-info text-base shrink-0"></i>
+        <span>{{ session('info') }}</span>
+      </div>
+    @endif
     @yield('content')
   </main>
 
-  {{-- ============ MODAL 1 : Detail Visi & Misi ============ --}}
-  <div id="popupModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"
-    class="hidden fixed inset-0 z-50 justify-center items-center p-6 bg-slate-900/80 backdrop-blur-sm">
-    <div class="relative flex flex-col w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white border-2 shadow-2xl rounded-3xl border-slate-100">
-
-      <button id="closeBtn" type="button" aria-label="Tutup detail kandidat"
-        class="flex absolute top-4 right-4 z-10 justify-center items-center w-9 h-9 rounded-full shadow text-slate-500 bg-white/90 hover:text-slate-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <i class="text-[20px] fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="flex overflow-hidden relative justify-center items-center border-b aspect-video bg-slate-50 border-slate-100 shrink-0">
-        <img id="modalImg" src="" alt="" class="w-full h-full object-cover" width="400" height="300">
-      </div>
-
-      <div class="p-4 sm:p-6">
-        <h3 id="modalTitle" class="mb-4 text-3xl font-bold text-center text-slate-900"></h3>
-
-        <div class="overflow-y-auto space-y-4 h-48 text-slate-600">
-          <div class="p-4 bg-yellow-50 rounded-xl border-2 border-yellow-200">
-            <h4 class="flex gap-1 items-center mb-1 text-lg font-bold uppercase text-slate-900">
-              <i class="text-[20px] text-yellow-600 fa-solid fa-compass"></i> Visi
-            </h4>
-            <div id="modalVisi" class="text-sm leading-relaxed text-slate-600"></div>
-          </div>
-          <div class="p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
-            <h4 class="flex gap-1 items-center mb-1 text-lg font-bold uppercase text-slate-900">
-              <i class="text-[20px] text-blue-600 fa-solid fa-bullseye"></i> Misi
-            </h4>
-            <div id="modalMisi" class="text-sm leading-relaxed text-slate-600"></div>
-          </div>
-        </div>
-
-        <div class="grid gap-3 pt-4 mt-4 border-t border-slate-100">
-          {{-- ID unik: hanya satu #modalVoteBtn di seluruh halaman --}}
-          <button id="modalVoteBtn" type="button"
-            class="flex gap-2 justify-center items-center px-5 py-3 w-full text-sm font-semibold text-blue-600 bg-white rounded-xl border-2 border-blue-600 transition-colors hover:bg-blue-600 hover:text-white">
-            <i class="text-[16px] fa-solid fa-check-to-slot"></i> Pilih Kandidat Ini
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   {{-- ============ MODAL 2 : Dialog E-Vote (pengganti SweetAlert) ============ --}}
   <div id="evDialog" role="alertdialog" aria-modal="true" aria-labelledby="evTitle" aria-describedby="evText"

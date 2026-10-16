@@ -23,8 +23,8 @@ return new class extends Migration
         });
         DB::table('tb_settings')->insert([
             'nama_sekolah'      => 'SMK INFORMATIKA SUMEDANG',
-            'judul_pemilihan' => 'Pemilihan OSIS 2023',
-            'tahun_ajaran'    => '2023/2024',
+            'judul_pemilihan' => 'E-VOTE OSIS',
+            'tahun_ajaran'    => '2026-2027',
             'status_voting'   => 0,
             'view_voted'      => 0,
             'waktu_mulai'     => now(),

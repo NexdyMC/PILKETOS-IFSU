@@ -3,7 +3,7 @@
 @section('cdn')
   <!-- CDN : Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="{{ asset('js/tailwind.config.js') }}"></script>
+  @include('partials.tailwind-config')
 
   <!-- CDN : Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -159,7 +159,7 @@
             <div class="flex-1 min-w-0">
               <h4 class="text-sm font-bold leading-snug text-slate-900 sm:text-base">Penting Diperhatikan!</h4>
               <p class="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium leading-relaxed text-left">
-                Anda hanya dapat memilih satu kali dan tidak dapat mengubah pilihan setelahnya! Klik kartu kandidat untuk melihat visi &amp; misi selengkapnya.
+                Anda hanya dapat memilih satu kali dan tidak dapat mengubah pilihan setelahnya! Tentukan pilihan Anda dengan bijak.
               </p>
             </div>
           </div>
@@ -170,13 +170,7 @@
     <div class="flex relative justify-center items-center mx-auto w-full max-w-3xl">
       <div id="scroll-container" class="grid grid-cols-1 gap-4 w-full">
         @foreach ($kandidat as $row)
-          <div class="grid grid-cols-[7rem_1fr] sm:grid-cols-[11rem_1fr] gap-x-4 gap-y-3 p-4 text-left bg-white rounded-3xl border-2 transition-all duration-300 shadow-md cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:border-blue-500 border-slate-300/80 kandidat-item"
-            data-id="{{ $row->id }}"
-            data-nama="{{ $row->nama }}"
-            data-image="{{ $row->image_url }}"
-            tabindex="0" role="button"
-            aria-haspopup="dialog"
-            aria-label="Lihat visi dan misi {{ $row->nama }}">
+          <div class="grid grid-cols-[7rem_1fr] sm:grid-cols-[11rem_1fr] gap-x-4 gap-y-3 p-4 text-left bg-white rounded-3xl border-2 transition-all duration-300 shadow-md hover:shadow-lg border-slate-300/80">
 
             {{-- Foto (kiri) --}}
             <img src="{{ $row->image_url }}" alt="{{ $row->nama }}" width="176" height="176" loading="lazy" class="object-cover object-center w-full rounded-2xl border-2 shadow-sm aspect-square self-start border-slate-200 bg-slate-800 sm:row-span-2">
@@ -188,11 +182,6 @@
               <p class="flex gap-2 items-center mt-1 text-sm font-semibold sm:text-base text-slate-500">
                 <i class="text-[14px] fa-solid fa-graduation-cap"></i>{{ $row->kelas }}
               </p>
-
-              <button type="button"
-                class="inline-flex gap-1.5 items-center mt-2 w-fit text-sm font-semibold text-yellow-600 transition-colors btn-detail hover:text-yellow-700 hover:underline">
-                <i class="text-[14px] fa-solid fa-book-open"></i> Lihat Visi &amp; Misi
-              </button>
             </div>
 
             {{-- Bar lebar (bawah): tombol pilih --}}
@@ -213,9 +202,6 @@
                 </button>
               @endif
             </div>
-
-            <div class="hidden kandidat-visi">{{ $row->visi }}</div>
-            <div class="hidden kandidat-misi">{{ $row->misi }}</div>
           </div>
         @endforeach
       </div>
@@ -234,8 +220,6 @@
   $(function () {
     "use strict";
 
-    const $popupModal   = $('#popupModal');
-    const $modalVoteBtn = $('#modalVoteBtn');
     let voting = false; // cegah klik ganda
     const VOTING_BUKA = @json($votingBuka);
     const PESAN_TUTUP = @json($pengaturan->pesanTutup());
@@ -248,68 +232,11 @@
       $('html, body').animate({ scrollTop: $target.offset().top - 90 }, 400);
     });
 
-    // ================== POPUP VISI & MISI ==================
-    function openKandidatModal($card) {
-      $('#modalTitle').text($card.data('nama'));
-      $('#modalImg').attr('src', $card.data('image')).attr('alt', 'Kandidat ' + $card.data('nama')).attr('width', '100').attr('height', '100');
-      $('#modalVisi').text($.trim($card.find('.kandidat-visi').text()) || '-').css('white-space', 'pre-line');
-      $('#modalMisi').text($.trim($card.find('.kandidat-misi').text()) || '-').css('white-space', 'pre-line');
-      $modalVoteBtn.data('id', $card.data('id')).data('nama', $card.data('nama'));
-      if (!VOTING_BUKA) {
-        $modalVoteBtn.prop('disabled', true)
-          .html('<i class="text-[16px] fa-solid fa-lock"></i> Vote sudah ditutup')
-          .removeClass('text-blue-600 bg-white border-blue-600 hover:bg-blue-600 hover:text-white')
-          .addClass('text-slate-400 bg-slate-100 border-slate-300 cursor-not-allowed');
-      }
-      $popupModal.removeClass('hidden').addClass('flex');
-      $('body').addClass('overflow-hidden');
-    }
-
-    function closeKandidatModal() {
-      $popupModal.addClass('hidden').removeClass('flex');
-      $('body').removeClass('overflow-hidden');
-    }
-
-    // klik kartu -> buka popup (kecuali klik pada tombol)
-    $('#scroll-container').on('click', '.kandidat-item', function (e) {
-      if ($(e.target).closest('button').length) return;
-      openKandidatModal($(this));
-    });
-
-    $('#scroll-container').on('keydown', '.kandidat-item', function (e) {
-      if (e.target !== this) return;
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openKandidatModal($(this));
-      }
-    });
-
-    // tombol "Lihat Visi & Misi" -> ambil data dari kartu induknya
-    $('#scroll-container').on('click', '.btn-detail', function (e) {
-      e.stopPropagation();
-      openKandidatModal($(this).closest('.kandidat-item'));
-    });
-
-    $('#closeBtn').on('click', closeKandidatModal);
-    $popupModal.on('click', function (e) {
-      if (e.target === this) closeKandidatModal();
-    });
-    $(document).on('keydown', function (e) {
-      if (e.key === 'Escape' && $popupModal.hasClass('flex') && !EVoteDialog.isOpen()) closeKandidatModal();
-    });
-
     // ================== VOTING ==================
     // tombol vote di kartu
     $('#scroll-container').on('click', '.btn-vote', function (e) {
       e.stopPropagation();
       selectKandidat($(this).data('id'), $(this).data('nama'));
-    });
-
-    // tombol vote di popup
-    $modalVoteBtn.on('click', function () {
-      const id = $(this).data('id'), nama = $(this).data('nama');
-      closeKandidatModal();
-      selectKandidat(id, nama);
     });
 
     function selectKandidat(idKandidat, nama) {
@@ -341,10 +268,10 @@
         })
         .done(function () {
           EVoteDialog.success({
-            text: 'Vote untuk ' + nama + ' berhasil disimpan.',
+            text: 'Vote untuk ' + nama + ' berhasil disimpan. Anda akan dialihkan ke halaman Hasil.',
             seconds: 5
           }).then(function () {
-            location.href = "/siswa/logout";
+            location.href = "{{ route('siswa.hasil') }}";
           });
         })
         .fail(function (jqXHR) {

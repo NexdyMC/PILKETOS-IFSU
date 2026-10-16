@@ -13,7 +13,7 @@
   
   <!-- link : CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="{{ asset('js/tailwind.config.js') }}"></script>
+  @include('partials.tailwind-config')
   
   <!-- CDN : Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -61,7 +61,7 @@
             <i class="text-[16px] transition-transform fa-solid fa-arrow-right group-hover:translate-x-1"></i>
           </button>
         </form>
-        <div class="pt-6 mt-6 text-center border-t border-slate-100 w-full">
+        <div class="pt-6 mt-6 q border-t border-slate-100 w-full">
           <p class="text-xs text-slate-500 flex items-center justify-center gap-1.5">
             <i class="text-[16px] fa-solid fa-shield-halved text-emerald-600"></i>
             <span>Akses khusus panitia dan administrator pemilihan.</span>

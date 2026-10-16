@@ -31,9 +31,14 @@ class ExportController extends Controller
         $layout   = $this->layout($request);
         $kelompok = $this->kelompokKelas($siswa);
 
-        $nama = $request->filled('kelas')
-            ? 'token-' . $layout . '-' . (Str::slug($request->query('kelas')) ?: 'kelas') . '.pdf'
-            : 'token-' . $layout . '-semua-kelas.pdf';
+        $kelasQuery = (string) $request->query('kelas', '');
+        $isGuru = strcasecmp(trim($kelasQuery), 'guru') === 0;
+
+        if ($request->filled('kelas')) {
+            $nama = $isGuru ? 'token-' . $layout . '-guru.pdf' : 'token-' . $layout . '-' . (Str::slug($kelasQuery) ?: 'kelas') . '.pdf';
+        } else {
+            $nama = 'token-' . $layout . '-semua-kelas.pdf';
+        }
 
         return $this->unduh($this->renderPdf($layout, $kelompok), $nama, 'application/pdf');
     }
@@ -90,9 +95,14 @@ class ExportController extends Controller
         }
 
         $perKelas = $request->boolean('per_kelas') && !$request->filled('kelas');
-        $nama     = $request->filled('kelas')
-            ? 'data-siswa-' . (Str::slug($request->query('kelas')) ?: 'kelas') . '.xlsx'
-            : 'data-siswa-semua-kelas.xlsx';
+        $kelasQuery = (string) $request->query('kelas', '');
+        $isGuru = strcasecmp(trim($kelasQuery), 'guru') === 0;
+
+        if ($request->filled('kelas')) {
+            $nama = $isGuru ? 'data-pemilih-guru.xlsx' : 'data-siswa-' . (Str::slug($kelasQuery) ?: 'kelas') . '.xlsx';
+        } else {
+            $nama = 'data-pemilih-semua-kelas.xlsx';
+        }
 
         return Excel::download(new \App\Exports\SiswaExport($siswa, $perKelas), $nama);
     }

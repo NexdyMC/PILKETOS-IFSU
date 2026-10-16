@@ -16,7 +16,11 @@ use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-/** Satu sheet: No | Token | Nama | Kelas */
+/**
+ * Satu sheet export pemilih:
+ * - Siswa : No | Nama | Kelas | Token
+ * - Guru  : No | Nama Guru | Token
+ */
 class SiswaSheet extends DefaultValueBinder implements
     FromCollection,
     WithHeadings,
@@ -27,9 +31,13 @@ class SiswaSheet extends DefaultValueBinder implements
     WithCustomValueBinder
 {
     private int $no = 0;
+    private bool $isGuru = false;
 
     public function __construct(private string $judul, private Collection $siswa)
     {
+        // Deteksi apakah data sheet ini khusus Guru (berdasarkan judul atau isi kelas)
+        $this->isGuru = strcasecmp(trim($this->judul), 'guru') === 0 
+            || ($this->siswa->isNotEmpty() && $this->siswa->every(fn($s) => strcasecmp(trim((string)($s->kelas ?? '')), 'guru') === 0));
     }
 
     public function collection(): Collection
@@ -39,25 +47,34 @@ class SiswaSheet extends DefaultValueBinder implements
 
     public function headings(): array
     {
-        return ['No', 'Token', 'Nama', 'Kelas'];
+        if ($this->isGuru) {
+            return ['No', 'Nama Guru', 'Token'];
+        }
+
+        return ['No', 'Nama', 'Kelas', 'Token'];
     }
 
     public function map(mixed $siswa): array
     {
-        return [++$this->no, $siswa->token, $siswa->nama, $siswa->kelas];
+        if ($this->isGuru) {
+            return [++$this->no, $siswa->nama, $siswa->token];
+        }
+
+        return [++$this->no, $siswa->nama, $siswa->kelas, $siswa->token];
     }
 
     public function title(): string
     {
-        // aturan Excel: maks 31 karakter dan tanpa  \ / ? * [ ] :
+        // aturan Excel: maks 31 karakter dan tanpa \ / ? * [ ] :
         $judul = trim(str_replace(['\\', '/', '?', '*', '[', ']', ':'], '-', $this->judul));
-        return mb_substr($judul !== '' ? $judul : 'Siswa', 0, 31);
+        return mb_substr($judul !== '' ? $judul : ($this->isGuru ? 'Guru' : 'Siswa'), 0, 31);
     }
 
     public function styles(Worksheet $sheet): ?array
     {
-        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:D1')->getFill()
+        $lastCol = $this->isGuru ? 'C' : 'D';
+        $sheet->getStyle("A1:{$lastCol}1")->getFont()->setBold(true);
+        $sheet->getStyle("A1:{$lastCol}1")->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FFE2E8F0');
         $sheet->freezePane('A2');
@@ -65,10 +82,11 @@ class SiswaSheet extends DefaultValueBinder implements
         return [];
     }
 
-    /** Kolom Token (B) selalu teks, supaya token seperti "0206" tidak berubah jadi angka 206. */
+    /** Kolom Token selalu diformat teks, supaya token angka awalan nol tidak terpotong */
     public function bindValue(Cell $cell, $value): bool
     {
-        if ($cell->getColumn() === 'B' && $cell->getRow() > 1) {
+        $kolomToken = $this->isGuru ? 'C' : 'D';
+        if ($cell->getColumn() === $kolomToken && $cell->getRow() > 1) {
             $cell->setValueExplicit((string) $value, DataType::TYPE_STRING);
             return true;
         }

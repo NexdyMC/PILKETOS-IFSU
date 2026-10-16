@@ -659,17 +659,30 @@
         });
     }
 
-    /* ---------- tambah siswa ---------- */
+    /* ---------- tambah pemilih (siswa / guru) ---------- */
     function tambahSiswa() {
         Modal.fire({
-            html: header('fa-solid fa-user-plus', 'bg-primary-50 text-primary-700', 'Tambah Siswa',
-                         'Daftarkan pemilih baru. Token dipakai siswa untuk login saat voting.') + `
-                <div class="px-6 pb-1 space-y-4">
+            html: header('fa-solid fa-user-plus', 'bg-primary-50 text-primary-700', 'Tambah Pemilih (Siswa / Guru)',
+                         'Daftarkan pemilih baru. Token dipakai siswa/guru untuk login saat voting.') + `
+                <div class="px-6 pb-1 space-y-4 text-left">
                     <div>
-                        <label class="${LABEL}" for="swNama">Nama Siswa</label>
-                        <input id="swNama" type="text" maxlength="100" autocomplete="off" placeholder="cth. Aditya Pratama" class="${INPUT}">
+                        <label class="${LABEL}">Kategori Pemilih</label>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                                <input type="radio" name="swKategori" value="siswa" checked class="text-primary-600 focus:ring-primary-500">
+                                <span class="text-xs sm:text-sm font-semibold text-slate-700"><i class="fa-solid fa-graduation-cap text-primary-600 mr-1"></i>Siswa</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                                <input type="radio" name="swKategori" value="guru" class="text-primary-600 focus:ring-primary-500">
+                                <span class="text-xs sm:text-sm font-semibold text-slate-700"><i class="fa-solid fa-chalkboard-user text-emerald-600 mr-1"></i>Guru</span>
+                            </label>
+                        </div>
                     </div>
                     <div>
+                        <label class="${LABEL}" id="swLabelNama" for="swNama">Nama Siswa</label>
+                        <input id="swNama" type="text" maxlength="100" autocomplete="off" placeholder="cth. Aditya Pratama" class="${INPUT}">
+                    </div>
+                    <div id="swContainerKelas">
                         <label class="${LABEL}" for="swKelas">Kelas</label>
                         <input id="swKelas" type="text" maxlength="50" autocomplete="off" placeholder="cth. 11 RPL 1" class="${INPUT}">
                     </div>
@@ -691,11 +704,42 @@
             cancelButtonText: 'Batal',
             showLoaderOnConfirm: true,
             allowOutsideClick: () => !Swal.isLoading(),
-            didOpen: () => { $('#swNama').trigger('focus'); },
+            didOpen: () => {
+                $('#swNama').trigger('focus');
+
+                // Toggle kategori Siswa vs Guru
+                $('input[name="swKategori"]').on('change', function() {
+                    const isGuru = $(this).val() === 'guru';
+                    if (isGuru) {
+                        $('#swLabelNama').text('Nama Guru');
+                        $('#swNama').attr('placeholder', 'cth. Dra. Hj. Nurhayati');
+                        $('#swKelas').val('Guru').prop('readonly', true).addClass('bg-slate-100 text-slate-500');
+                    } else {
+                        $('#swLabelNama').text('Nama Siswa');
+                        $('#swNama').attr('placeholder', 'cth. Aditya Pratama');
+                        if ($('#swKelas').val().toLowerCase() === 'guru') {
+                            $('#swKelas').val('');
+                        }
+                        $('#swKelas').prop('readonly', false).removeClass('bg-slate-100 text-slate-500').attr('placeholder', 'cth. 11 RPL 1');
+                    }
+                });
+
+                // Auto deteksi jika admin ketik "guru" di kolom kelas
+                $('#swKelas').on('input', function() {
+                    if ($(this).val().trim().toLowerCase() === 'guru') {
+                        $('input[name="swKategori"][value="guru"]').prop('checked', true).trigger('change');
+                    }
+                });
+            },
             preConfirm: () => {
+                const kategori = $('input[name="swKategori"]:checked').val();
                 const nama  = $('#swNama').val().trim();
-                const kelas = $('#swKelas').val().trim();
+                let kelas = $('#swKelas').val().trim();
                 const token = $('#swToken').val().trim();
+
+                if (kategori === 'guru') {
+                    kelas = 'Guru';
+                }
 
                 if (!nama || !kelas) {
                     Swal.showValidationMessage('Nama dan kelas wajib diisi.');
@@ -706,16 +750,17 @@
                     return false;
                 }
                 return request(cfg.store, 'POST', { nama, kelas, token })
-                    .then((res) => ({ res, nama }))
+                    .then((res) => ({ res, nama, kategori }))
                     .catch((xhr) => { Swal.showValidationMessage(pesanError(xhr)); return false; });
             }
         }).then((result) => {
             if (!result.isConfirmed || !result.value) return;
-            const { res, nama } = result.value;
+            const { res, nama, kategori } = result.value;
             loadSiswa();
 
+            const jenisLabel = kategori === 'guru' ? 'Guru' : 'Siswa';
             Modal.fire({
-                html: header('fa-solid fa-check', 'bg-emerald-50 text-emerald-600', 'Siswa ditambahkan',
+                html: header('fa-solid fa-check', 'bg-emerald-50 text-emerald-600', jenisLabel + ' ditambahkan',
                              'Catat atau salin token ini untuk <b>' + esc(nama) + '</b>.') + `
                     <div class="px-6 pb-1">
                         <div class="p-5 text-center rounded-2xl border border-slate-200 bg-slate-50">
@@ -734,9 +779,9 @@
     /* ---------- import excel ---------- */
     function importExcel() {
         Modal.fire({
-            html: header('fa-solid fa-file-excel', 'bg-emerald-50 text-emerald-600', 'Import Siswa dari Excel',
-                         'Hanya kolom <b>nama</b> dan <b>kelas</b> yang dibaca. Token dibuat otomatis.') + `
-                <div class="px-6 pb-1 space-y-4">
+            html: header('fa-solid fa-file-excel', 'bg-emerald-50 text-emerald-600', 'Import Pemilih dari Excel',
+                         'Pilih kategori pemilih dan upload file Excel/CSV. Token dibuat otomatis.') + `
+                <div class="px-6 pb-1 space-y-4 text-left">
                     <label id="swDrop" for="swFile"
                            class="flex flex-col gap-1 justify-center items-center p-6 text-center rounded-2xl border-2 border-dashed transition cursor-pointer border-slate-300 bg-slate-50 hover:border-primary-400 hover:bg-primary-50/50">
                         <i class="mb-1 text-2xl fa-solid fa-cloud-arrow-up text-slate-400"></i>
@@ -744,10 +789,37 @@
                         <span class="text-xs text-slate-500">.xlsx, .xls, atau .csv (maks 2MB)</span>
                         <input id="swFile" type="file" accept=".xlsx,.xls,.csv" class="hidden">
                     </label>
+
+                    <div>
+                        <label class="${LABEL}">Kategori Pemilih</label>
+                        <div class="grid grid-cols-2 gap-2 mt-1">
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                                <input type="radio" name="swImportKategori" value="siswa" checked class="text-primary-600 focus:ring-primary-500">
+                                <span class="text-xs sm:text-sm font-semibold text-slate-700"><i class="fa-solid fa-graduation-cap text-primary-600 mr-1"></i>Siswa</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer bg-slate-50 hover:bg-slate-100 transition">
+                                <input type="radio" name="swImportKategori" value="guru" class="text-primary-600 focus:ring-primary-500">
+                                <span class="text-xs sm:text-sm font-semibold text-slate-700"><i class="fa-solid fa-chalkboard-user text-emerald-600 mr-1"></i>Guru</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="p-3 text-xs leading-relaxed rounded-xl border border-slate-200 bg-slate-50 text-slate-600">
-                        Baris pertama harus berisi judul kolom <b>nama</b> dan <b>kelas</b>. Siswa dengan nama dan kelas yang sama
-                        dengan data yang sudah ada akan dilewati.
-                        <a href="${esc(cfg.template)}" class="font-semibold text-primary-700 hover:underline">Unduh template</a>
+                        <div id="swImportPetunjukSiswa">
+                            Baris pertama harus berisi judul kolom <b>nama</b> dan <b>kelas</b>.<br>
+                            Kolom <b>kelas</b> dapat diisi nama kelas siswa (cth: <code>11 RPL 1</code>).<br>
+                            <span class="text-slate-500">Data dengan nama dan kelas yang sama dengan data yang sudah ada akan otomatis dilewati.</span>
+                        </div>
+                        <div id="swImportPetunjukGuru" class="hidden">
+                            Baris pertama harus berisi judul kolom <b>nama</b> (kolom kelas opsional).<br>
+                            Seluruh baris yang diimpor akan otomatis ditetapkan sebagai kategori <b>Guru</b>.<br>
+                            <span class="text-slate-500">Data guru dengan nama yang sama yang sudah ada akan otomatis dilewati.</span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-slate-200/80">
+                            <a id="swLinkTemplate" href="${esc(cfg.template)}?kategori=siswa" class="font-semibold text-primary-700 hover:underline">
+                                <i class="fa-solid fa-download mr-1"></i>Unduh template Excel (<span id="swTeksTemplate">Siswa</span>)
+                            </a>
+                        </div>
                     </div>
                 </div>`,
             showCancelButton: true,
@@ -755,9 +827,19 @@
             cancelButtonText: 'Batal',
             showLoaderOnConfirm: true,
             allowOutsideClick: () => !Swal.isLoading(),
+            didOpen: () => {
+                $('input[name="swImportKategori"]').on('change', function () {
+                    const isGuru = $(this).val() === 'guru';
+                    $('#swImportPetunjukSiswa').toggleClass('hidden', isGuru);
+                    $('#swImportPetunjukGuru').toggleClass('hidden', !isGuru);
+                    $('#swTeksTemplate').text(isGuru ? 'Guru' : 'Siswa');
+                    $('#swLinkTemplate').attr('href', cfg.template + '?kategori=' + (isGuru ? 'guru' : 'siswa'));
+                });
+            },
             preConfirm: () => {
                 const input = document.getElementById('swFile');
                 const file  = input && input.files ? input.files[0] : null;
+                const kategori = $('input[name="swImportKategori"]:checked').val() || 'siswa';
 
                 if (!file) {
                     Swal.showValidationMessage('Pilih file Excel terlebih dahulu.');
@@ -770,6 +852,7 @@
 
                 const fd = new FormData();
                 fd.append('file', file);
+                fd.append('kategori', kategori);
                 return request(cfg.import, 'POST', fd)
                     .catch((xhr) => { Swal.showValidationMessage(pesanError(xhr)); return false; });
             }

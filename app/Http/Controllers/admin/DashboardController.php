@@ -16,11 +16,13 @@ class DashboardController extends Controller
      */
     public function apiSiswa(): JsonResponse
     {
-        $data = Siswa::all();
-
-        if (!Settings::ambil()->view_voted) {
-            $data = collect($data)->map(fn ($s) => collect($s)->except('voted')->all())->values();
+        $viewVoted = (bool) Settings::ambil()->view_voted;
+        $kolom = ['token', 'nama', 'kelas', 'status'];
+        if ($viewVoted) {
+            $kolom[] = 'voted';
         }
+
+        $data = Siswa::query()->select($kolom)->get();
 
         return response()->json($data);
     }

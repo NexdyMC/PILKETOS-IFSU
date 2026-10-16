@@ -47,6 +47,9 @@
 <div class="footer">Rahasia &middot; {{ $pengaturan['judul'] }} &middot; Halaman <span class="pagenum"></span></div>
 
 @foreach ($kelompok as $kelas => $rows)
+@php
+  $isGuru = strcasecmp(trim((string) $kelas), 'guru') === 0;
+@endphp
 <div class="{{ $loop->last ? '' : 'pisah' }}">
 
   <div class="kop">
@@ -55,8 +58,8 @@
   </div>
 
   @if ($layout === 'kartu')
-    <h2>Kartu Token Pemilih &mdash; Kelas {{ $kelas }}</h2>
-    <p class="meta">{{ $rows->count() }} siswa &middot; Dicetak {{ $dicetak }} &middot; Gunting sesuai garis putus-putus</p>
+    <h2>Kartu Token Pemilih &mdash; {{ $isGuru ? 'Guru' : 'Kelas ' . $kelas }}</h2>
+    <p class="meta">{{ $rows->count() }} {{ $isGuru ? 'guru' : 'siswa' }} &middot; Dicetak {{ $dicetak }} &middot; Gunting sesuai garis putus-putus</p>
 
     <table class="grid">
       @foreach ($rows->chunk(2) as $pasang)
@@ -66,7 +69,7 @@
           <div class="kartu">
             <div class="atas">{{ $pengaturan['judul'] }}</div>
             <div class="nama">{{ $s->nama }}</div>
-            <div class="kls">Kelas {{ $s->kelas }}</div>
+            <div class="kls">{{ $isGuru ? 'Kategori Guru' : 'Kelas ' . $s->kelas }}</div>
             <div class="kotak">
               <div class="lbl">TOKEN LOGIN</div>
               <div class="tok">{{ $s->token }}</div>
@@ -82,30 +85,40 @@
       @endforeach
     </table>
   @else
-    <h2>Daftar Token Pemilih &mdash; Kelas {{ $kelas }}</h2>
-    <p class="meta">{{ $rows->count() }} siswa &middot; Dicetak {{ $dicetak }}</p>
+    <h2>Daftar Token Pemilih &mdash; {{ $isGuru ? 'Guru' : 'Kelas ' . $kelas }}</h2>
+    <p class="meta">{{ $rows->count() }} {{ $isGuru ? 'guru' : 'siswa' }} &middot; Dicetak {{ $dicetak }}</p>
 
     <table class="tabel">
       <thead>
-        <tr>
-          <th class="no">No</th>
-          <th>Nama</th>
-          <th>kelas</th>
-          <th>Token</th>
-        </tr>
+        @if ($isGuru)
+          <tr>
+            <th class="no">No</th>
+            <th>Nama Guru</th>
+            <th>Token</th>
+          </tr>
+        @else
+          <tr>
+            <th class="no">No</th>
+            <th>Nama</th>
+            <th>Kelas</th>
+            <th>Token</th>
+          </tr>
+        @endif
       </thead>
       <tbody>
         @foreach ($rows as $s)
         <tr>
           <td class="no">{{ $loop->iteration }}</td>
           <td>{{ $s->nama }}</td>
-          <td>{{ $s->kelas }}</td>
+          @if (!$isGuru)
+            <td>{{ $s->kelas }}</td>
+          @endif
           <td class="token">{{ $s->token }}</td>
         </tr>
         @endforeach
       </tbody>
     </table>
-    <p class="catatan">Token bersifat rahasia dan hanya untuk siswa yang bersangkutan. Login di {{ $urlVoting }}</p>
+    <p class="catatan">Token bersifat rahasia dan hanya untuk {{ $isGuru ? 'guru' : 'siswa' }} yang bersangkutan. Login di {{ $urlVoting }}</p>
   @endif
 
 </div>

@@ -11,6 +11,14 @@ class HasilController extends Controller
 {
     public function index() 
     {
+        $siswa = Siswa::where('token', session('token'))->first();
+        $isGuru = $siswa && strcasecmp(trim((string) $siswa->kelas), 'guru') === 0;
+
+        // Jika bukan guru dan belum voting, tolak dan alihkan ke bilik voting
+        if (!$isGuru && (!$siswa || $siswa->status != 1)) {
+            return redirect()->route('siswa.voting')->with('error', 'Silakan lakukan voting terlebih dahulu sebelum melihat hasil pemilihan.');
+        }
+
         return view('siswa.hasil.index');
     }
 

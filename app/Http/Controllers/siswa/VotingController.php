@@ -12,6 +12,14 @@ class VotingController extends Controller
 {
     public function index()
     {
+        $siswaModel = Siswa::where('token', session('token'))->first();
+        $isGuru = $siswaModel && strcasecmp(trim((string) $siswaModel->kelas), 'guru') === 0;
+
+        // Jika siswa biasa sudah voting, langsung arahkan ke halaman hasil
+        if (!$isGuru && $siswaModel && $siswaModel->status == 1) {
+            return redirect()->route('siswa.hasil')->with('info', 'Anda sudah memberikan suara.');
+        }
+
         $pengaturan = Settings::ambil();
         $votingBuka = $pengaturan->votingBuka();
         $kandidat   = Kandidat::all();
@@ -29,12 +37,12 @@ class VotingController extends Controller
             default                 => 'Selamat malam',
         };
 
-        // dummy: nanti bisa dipindah ke tabel/config
+        // Langkah voting
         $langkahVoting = [
             ['ikon' => 'fa-user-check',      'judul' => 'Masuk dengan Token',   'deskripsi' => 'Login memakai token unik dari panitia. Jangan berikan token Anda kepada siapa pun.'],
             ['ikon' => 'fa-book-open',       'judul' => 'Kenali Kandidat',      'deskripsi' => 'Baca visi dan misi setiap kandidat. Klik kartu kandidat untuk melihat selengkapnya.'],
             ['ikon' => 'fa-check-to-slot',   'judul' => 'Pilih Satu Kandidat',  'deskripsi' => 'Tekan "Pilih Kandidat Ini" lalu konfirmasi. Suara hanya bisa diberikan satu kali.'],
-            ['ikon' => 'fa-right-from-bracket', 'judul' => 'Selesai',           'deskripsi' => 'Setelah suara tersimpan, Anda otomatis keluar dari sistem.'],
+            ['ikon' => 'fa-chart-line',      'judul' => 'Lihat Hasil Realtime', 'deskripsi' => 'Setelah suara tersimpan, Anda dapat melihat perolehan suara secara langsung di halaman Hasil.'],
         ];
 
         return view('siswa.voting.index', compact(
@@ -95,6 +103,9 @@ class VotingController extends Controller
                 'message' => 'Kamu sudah melakukan voting'
             ], 403);
         }
+
+        // Sinkronkan status di session agar navbar dan controller langsung aktif
+        session(['status' => 1]);
 
         return response()->json([
             'success' => true,

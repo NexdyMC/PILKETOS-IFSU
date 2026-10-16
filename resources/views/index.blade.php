@@ -9,7 +9,7 @@
 
   <!-- link : CDN  -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="{{ asset('js/tailwind.config.js') }}"></script>
+  @include('partials.tailwind-config')
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -17,6 +17,7 @@
   <!-- link : style css -->
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  @include('partials.pwa-head')
 </head>
 <body class="bg-white antialiased text-navy-900">
 
@@ -27,7 +28,7 @@
       <!-- navbar : title -->
       <div class="flex gap-2 items-center">
         <img src="{{ asset('assets/images/logo-smk.png') }}" alt="Logo IFSU" class="w-12 h-12" width="32" height="32">
-        <p class="text-xl font-semibold font-display text-navy-900">E-Vote<span class="text-primary-600"> OSIS</span>
+        <p class="text-xl font-bold font-display text-navy-900">E-VOTE<span class="text-primary-600"> OSIS</span>
         </p>
       </div>
 

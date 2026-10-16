@@ -294,7 +294,8 @@ function initCharts() {
         borderRadius: 8,
         borderSkipped: false,   // border melingkar penuh, termasuk sisi bawah
         minBarLength: 8,        // batang tetap terlihat walau 0 suara
-        maxBarThickness: 55,
+        barThickness: 60,
+        maxBarThickness: 60,
         hoverBackgroundColor: colors.map(c => withAlpha(c, 0.45))
       }]
     },

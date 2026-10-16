@@ -19,7 +19,8 @@ class ImportController extends Controller
     public function import(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => ['required', 'file', 'extensions:xlsx,xls,csv', 'max:2048'],
+            'file'     => ['required', 'file', 'extensions:xlsx,xls,csv', 'max:2048'],
+            'kategori' => ['nullable', 'string', 'in:siswa,guru'],
         ], [
             'file.required'   => 'Pilih file Excel terlebih dahulu.',
             'file.extensions' => 'Format file harus .xlsx, .xls, atau .csv.',
@@ -30,7 +31,8 @@ class ImportController extends Controller
         @set_time_limit(300);
         @ini_set('memory_limit', '512M');
 
-        $import = new SiswaImport();
+        $kategori = $request->input('kategori', 'siswa');
+        $import   = new SiswaImport($kategori);
 
         try {
             // satu transaksi: kalau proses terhenti di tengah jalan (error/timeout), tidak ada data setengah masuk
@@ -49,9 +51,11 @@ class ImportController extends Controller
         }
 
         if ($import->kolomHilang) {
-            return response()->json([
-                'message' => 'Kolom "nama" dan "kelas" tidak ditemukan. Pastikan baris pertama berisi judul kolom tersebut (unduh template jika perlu).',
-            ], 422);
+            $pesanKolom = $kategori === 'guru'
+                ? 'Kolom "nama" (atau "nama guru") tidak ditemukan. Pastikan baris pertama berisi judul kolom tersebut (unduh template jika perlu).'
+                : 'Kolom "nama" dan "kelas" tidak ditemukan. Pastikan baris pertama berisi judul kolom tersebut (unduh template jika perlu).';
+
+            return response()->json(['message' => $pesanKolom], 422);
         }
 
         return response()->json([
@@ -64,8 +68,10 @@ class ImportController extends Controller
     }
 
     /** GET /admin/siswa/template */
-    public function template(): BinaryFileResponse
+    public function template(Request $request): BinaryFileResponse
     {
-        return Excel::download(new SiswaTemplateExport(), 'template-siswa.xlsx');
+        $kategori = $request->query('kategori', 'siswa');
+        $namaFile = $kategori === 'guru' ? 'template-guru.xlsx' : 'template-siswa.xlsx';
+        return Excel::download(new SiswaTemplateExport($kategori), $namaFile);
     }
 }

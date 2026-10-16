@@ -12,14 +12,67 @@ function toggleSidebar(open) {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   if (!sidebar || !overlay) return;
-  if (open) {
-    sidebar.classList.add('open');
+
+  const shouldOpen = typeof open === 'boolean' ? open : sidebar.classList.contains('-translate-x-full');
+
+  if (shouldOpen) {
+    sidebar.classList.remove('-translate-x-full');
+    sidebar.classList.add('translate-x-0', 'open');
     overlay.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
   } else {
-    sidebar.classList.remove('open');
+    sidebar.classList.add('-translate-x-full');
+    sidebar.classList.remove('translate-x-0', 'open');
     overlay.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
   }
 }
+
+// Buka/tutup Mobile Bottom Sheet Menu (Settings & Logout)
+function toggleMenuSheet(open) {
+  const sheet = document.getElementById('menuSheet');
+  const overlay = document.getElementById('menuSheetOverlay');
+  if (!sheet || !overlay) return;
+
+  const shouldOpen = typeof open === 'boolean' ? open : sheet.classList.contains('translate-y-full');
+
+  if (shouldOpen) {
+    if (typeof toggleSidebar === 'function') toggleSidebar(false);
+    sheet.classList.remove('translate-y-full');
+    sheet.classList.add('translate-y-0');
+    overlay.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
+  } else {
+    sheet.classList.add('translate-y-full');
+    sheet.classList.remove('translate-y-0');
+    overlay.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
+  }
+}
+
+// Tutup sidebar atau sheet saat tekan tombol Escape
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    toggleSidebar(false);
+    toggleMenuSheet(false);
+  }
+});
+
+// Tutup sidebar & sheet jika layar di-resize ke ukuran desktop (>= 1024px)
+window.addEventListener('resize', function () {
+  if (window.innerWidth >= 1024) {
+    toggleSidebar(false);
+    toggleMenuSheet(false);
+  }
+});
+
+// Listener navigasi Livewire (wire:navigate)
+document.addEventListener('livewire:navigated', function () {
+  toggleSidebar(false);
+  toggleMenuSheet(false);
+  if (window.lucide) lucide.createIcons();
+  if (window.AOS) AOS.refresh();
+});
 
 // Skeleton loading (efek pulse) selagi konten baru diambil
 function loadingSkeleton() {

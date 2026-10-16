@@ -375,13 +375,13 @@
         type: 'bar',
         data: {
           labels: rawLabels.map(l => wrapLabel(l, 14)),
-          datasets: [{
-            label: 'Suara Diperoleh',
-            data: rawVotes,
-            backgroundColor: ['#38BDF8', '#34D399', '#FBBF24', '#A78BFA', '#F472B6'],
-            borderRadius: 8,
-            borderSkipped: false,
-            maxBarThickness: 55,
+datasets: [{
+    label: 'Suara Diperoleh',
+    data: rawVotes,
+    backgroundColor: ['#38BDF8', '#34D399', '#FBBF24', '#A78BFA', '#F472B6'],
+    borderRadius: 8,
+            barThickness: 100,
+            maxBarThickness: 100,
             minBarLength: 8,
           }]
         },

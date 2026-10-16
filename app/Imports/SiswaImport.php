@@ -20,11 +20,12 @@ class SiswaImport implements OnEachRow, WithHeadingRow
     private const UKURAN_BATCH = 200;
 
     /** judul kolom yang diterima (sudah dalam bentuk slug: huruf kecil, spasi jadi "_") */
-    private const ALIAS_NAMA  = ['nama', 'nama_siswa', 'nama_lengkap', 'name'];
+    private const ALIAS_NAMA  = ['nama', 'nama_siswa', 'nama_guru', 'nama_lengkap', 'name'];
     private const ALIAS_KELAS = ['kelas', 'class', 'rombel'];
 
     public int $berhasil = 0;
     public bool $kolomHilang = false;
+    public string $kategori;
 
     /** @var array<int, array{baris:int,nama:string,kelas:string}> */
     public array $duplikat = [];
@@ -37,8 +38,10 @@ class SiswaImport implements OnEachRow, WithHeadingRow
     private array $buffer = [];         // antrean insert
     private ?array $kolom = null;       // ['nama' => ..., 'kelas' => ...] hasil deteksi judul kolom
 
-    public function __construct()
+    public function __construct(string $kategori = 'siswa')
     {
+        $this->kategori = strtolower(trim($kategori)) === 'guru' ? 'guru' : 'siswa';
+
         foreach (Siswa::query()->toBase()->get(['token', 'nama', 'kelas']) as $s) {
             $this->sudahAda[$this->kunci($s->nama, $s->kelas)] = true;
             $this->tokenTerpakai[strtoupper((string) $s->token)] = true;
@@ -64,10 +67,16 @@ class SiswaImport implements OnEachRow, WithHeadingRow
         }
 
         $nama  = $this->bersihkan($data[$this->kolom['nama']] ?? null);
-        $kelas = $this->bersihkan($data[$this->kolom['kelas']] ?? null);
+        $kelas = ($this->kolom['kelas'] !== null && isset($data[$this->kolom['kelas']]))
+            ? $this->bersihkan($data[$this->kolom['kelas']])
+            : '';
+
+        if ($this->kategori === 'guru') {
+            $kelas = 'Guru';
+        }
 
         // baris kosong: abaikan tanpa dilaporkan
-        if ($nama === '' && $kelas === '') {
+        if ($nama === '' && ($kelas === '' || $this->kategori === 'guru')) {
             return;
         }
 
@@ -145,6 +154,10 @@ class SiswaImport implements OnEachRow, WithHeadingRow
         }
         foreach (self::ALIAS_KELAS as $alias) {
             if (array_key_exists($alias, $data)) { $kelas = $alias; break; }
+        }
+
+        if ($this->kategori === 'guru') {
+            return $nama !== null ? ['nama' => $nama, 'kelas' => $kelas] : null;
         }
 
         return ($nama !== null && $kelas !== null) ? ['nama' => $nama, 'kelas' => $kelas] : null;

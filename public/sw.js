@@ -3,7 +3,7 @@
  * Progressive Web App (PWA)
  */
 
-const CACHE_NAME = 'pilketos-pwa-v1';
+const CACHE_NAME = 'pilketos-pwa-v2';
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE_ASSETS = [
@@ -15,7 +15,8 @@ const PRECACHE_ASSETS = [
   '/icons/apple-touch-icon.png',
   '/assets/images/logo-smk.png',
   '/assets/images/logo-osis.png',
-  '/assets/images/logo-mpk.png'
+  '/assets/images/logo-mpk.png',
+  '/assets/images/banner-og.png'
 ];
 
 // Install Event: Pre-cache core shell & offline page
