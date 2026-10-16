@@ -42,7 +42,7 @@ class SiswaSheet extends DefaultValueBinder implements
         return ['No', 'Token', 'Nama', 'Kelas'];
     }
 
-    public function map($siswa): array
+    public function map(mixed $siswa): array
     {
         return [++$this->no, $siswa->token, $siswa->nama, $siswa->kelas];
     }
@@ -54,7 +54,7 @@ class SiswaSheet extends DefaultValueBinder implements
         return mb_substr($judul !== '' ? $judul : 'Siswa', 0, 31);
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): ?array
     {
         $sheet->getStyle('A1:D1')->getFont()->setBold(true);
         $sheet->getStyle('A1:D1')->getFill()

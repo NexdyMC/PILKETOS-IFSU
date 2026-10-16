@@ -3,10 +3,14 @@
 namespace App\Exports;
 
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\Export;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class SiswaExport implements WithMultipleSheets
+class SiswaExport implements WithMultipleSheets, Export
 {
+    use Exportable;
+
     public function __construct(private Collection $siswa, private bool $sheetPerKelas = false)
     {
     }

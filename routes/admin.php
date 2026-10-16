@@ -62,6 +62,7 @@ Route::middleware(AdminMiddleware::class)->group(function () {
 
     /* ---------- API JSON dashboard ---------- */
     Route::get('/api/admin/siswa', [DashboardController::class, 'apiSiswa']);
+    Route::get('/api/admin/chart-stats', [DashboardController::class, 'apiChartStats'])->name('admin.chart.stats');
 
     /* ---------- Settings (API JSON) ---------- */
     Route::get('/api/admin/settings', [SettingsController::class, 'index'])->name('admin.settings.data');

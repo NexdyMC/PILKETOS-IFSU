@@ -210,6 +210,24 @@ const centerTextPlugin = {
   }
 };
 
+function wrapLabel(str, maxLen = 14) {
+  if (!str) return '';
+  if (Array.isArray(str)) return str;
+  const words = str.split(' ');
+  const lines = [];
+  let current = '';
+  words.forEach(w => {
+    if ((current ? current + ' ' + w : w).length <= maxLen) {
+      current = current ? current + ' ' + w : w;
+    } else {
+      if (current) lines.push(current);
+      current = w;
+    }
+  });
+  if (current) lines.push(current);
+  return lines.length > 1 ? lines : str;
+}
+
 function initCharts() {
   const tooltipStyle = {
     padding: 12,
@@ -276,24 +294,40 @@ function initCharts() {
         borderRadius: 8,
         borderSkipped: false,   // border melingkar penuh, termasuk sisi bawah
         minBarLength: 8,        // batang tetap terlihat walau 0 suara
-        maxBarThickness: 60,
+        maxBarThickness: 55,
         hoverBackgroundColor: colors.map(c => withAlpha(c, 0.45))
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: 20 },
+      layout: { padding: { top: 15, bottom: 5, left: 10, right: 10 } },
       animation: { duration: 800, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
         tooltip: {
           ...tooltipStyle,
-          callbacks: { label: ctx => ` ${ctx.parsed.y} suara` }
+          callbacks: {
+            title: function(items) {
+              if (!items || !items.length) return '';
+              const raw = items[0].chart.data.labels[items[0].dataIndex];
+              return Array.isArray(raw) ? raw.join(' ') : raw;
+            },
+            label: ctx => ` ${ctx.parsed.y} suara`
+          }
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#475569', font: { family: "'Inter', sans-serif", weight: '600' } } },
+        x: {
+          grid: { display: false },
+          ticks: {
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: false,
+            color: '#475569',
+            font: { family: "'Inter', sans-serif", weight: '600', size: 11 }
+          }
+        },
         y: {
           beginAtZero: true,
           suggestedMax: 5,   // sumbu tidak mentok di 0-1 saat data kosong
@@ -312,7 +346,7 @@ function initCharts() {
     }
 
     function perbandingan(labels, data) {
-        chartPerbandingan.data.labels = labels;
+        chartPerbandingan.data.labels = labels.map(l => wrapLabel(l, 14));
         chartPerbandingan.data.datasets[0].data = data;
         chartPerbandingan.update();
     }
