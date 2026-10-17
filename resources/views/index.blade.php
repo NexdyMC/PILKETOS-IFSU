@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
   <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="canonical" href="https://evoteosissmkifsu.sch.id">
+  <meta name="description" content="E-Vote OSIS adalah platform pemilihan OSIS yang aman, transparan, dan mudah digunakan.">
   <title>E-Vote OSIS</title>
 
   <!-- link : CDN  -->
@@ -64,7 +66,7 @@
     <div class="absolute -top-10 -left-10 w-72 h-72 rounded-full pointer-events-none blur-3xl opacity-35 bg-primary-500"></div>
     <div class="absolute right-0 top-24 w-80 h-80 rounded-full pointer-events-none blur-3xl opacity-35 bg-accent-400"></div>
 
-    <div class="relative px-6 mx-auto max-w-6xl text-center lg:pt-16">
+    <div class="relative px-6 mx-auto max-w-6xl text-center pt-8 sm:pt-16 md:pt-32 lg:pt-48">
       <h1 class="mt-6 text-4xl font-extrabold leading-tight font-display sm:text-5xl lg:text-6xl text-navy-900">
         Satu Suara <span class="text-primary-700">Satu Arah</span> 
         <br>untuk
@@ -428,7 +430,7 @@
           class="overflow-hidden relative rounded-2xl border shadow-2xl cursor-pointer video-facade aspect-video border-white/10 group bg-navy-800">
         <iframe
             class="absolute inset-0 w-full h-full"
-            src="https://www.youtube.com/embed/1rv1PjprD18?list=RD1rv1PjprD18"
+            src="https://youtube.com/shorts/RxGSyY9oXs0?si=jYaGaIdf_zfaa2Cx"
             title="Video tutorial voting"
             frameborder="0"
             loading="lazy"

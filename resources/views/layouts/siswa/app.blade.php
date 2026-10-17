@@ -15,7 +15,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description" content="Aplikasi {{ $set->judul_pemilihan }} untuk {{ $set->nama_sekolah }}" />
-  <link rel="canonical" href="https://evoteosisifsu-xyz.co.id">
+  <link rel="canonical" href="evoteosissmkifsu.sch.id">
   <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
   
   <title>@yield('title', 'E-Vote OSIS')</title>

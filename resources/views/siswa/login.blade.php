@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Aplikasi E-Vote OSIS Untuk SMK INFORMATIKA SUMEDANG" />
-    <link rel="canonical" href="https://evoteosisifsu-xyz.co.id">
+    <link rel="canonical" href="https://evoteosissmkifsu.sch.id">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
     <title>Login Siswa — E-Voting OSIS</title>
