@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <link rel="canonical" href="https://evoteosissmkifsu.sch.id">
+  <link rel="canonical" href="https://evoteosis.smkifsu.sch.id">
   <meta name="description" content="E-Vote OSIS adalah platform pemilihan OSIS yang aman, transparan, dan mudah digunakan.">
   <title>E-Vote OSIS</title>
 
