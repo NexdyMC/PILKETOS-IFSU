@@ -44,7 +44,7 @@
         <div class="flex gap-3 items-center min-w-0">
           <div class="flex overflow-hidden justify-center items-center w-10 h-10 font-bold rounded-xl bg-primary-700 font-display text-accent-400 shrink-0">
             @if ($logo)
-              <img src="{{ $logo }}" alt="Logo {{ $set->nama_sekolah }}" class="w-full h-full object-contain">
+              <img src="{{ asset('assets/images/logo-smk.png') }}" alt="Logo {{ $set->nama_sekolah }}" class="w-full h-full object-contain">
             @else
               {{ $inisial }}
             @endif
