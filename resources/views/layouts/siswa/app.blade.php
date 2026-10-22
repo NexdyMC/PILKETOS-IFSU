@@ -31,7 +31,7 @@
 
       <div class="flex z-10 gap-3 items-center">
         @if ($logo)
-        <img  src="{{ $logo ? asset('storage/logo/' . $logo) : asset('assets/images/logo-smk.png') }}" alt="Logo {{ $set->nama_sekolah }}" width="48" height="48" class="w-12 h-12 object-contain">
+        <img  src="{{ asset('assets/images/logo-smk.png') }}" alt="Logo {{ $set->nama_sekolah }}" width="48" height="48" class="w-12 h-12 object-contain">
         @else
           <div class="flex overflow-hidden justify-center items-center w-12 h-12 bg-yellow-400 rounded-xl shadow-md shrink-0 text-navy-950">
             <i class="text-[24px] text-white fa-solid fa-check-to-slot"></i>
