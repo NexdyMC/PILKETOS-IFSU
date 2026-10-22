@@ -99,7 +99,8 @@
           <!-- Profil Admin -->
           <div class="flex gap-3 items-center shrink-0">
             @if ($logo)
-              <img src="{{ $logo }}" alt="Foto Admin" class="w-10 h-10 rounded-full border-2 object-cover border-primary-100">
+              <img src="{{ $logo ? asset('storage/logo/' . $logo) : asset('assets/images/logo-smk.png') }}"  alt="Logo sekolah"  class="w-10 h-10 rounded-full border-2 object-cover border-primary-100">
+              {{-- <img src="{{ $logo }}" alt="Foto Admin" class="w-10 h-10 rounded-full border-2 object-cover border-primary-100"> --}}
             @else
               <div class="flex justify-center items-center w-10 h-10 rounded-full bg-primary-700 text-accent-400 font-bold border-2 border-primary-100 text-xs">
                 {{ $inisial }}
